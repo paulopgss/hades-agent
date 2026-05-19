@@ -23,17 +23,24 @@ class DreamService {
 
   async runDreamCycle() {
     logger.info('DreamService', 'Starting dream cycle...');
-    const sessions = sessionLogger.getUnprocessedSessions();
+    const settings = jsonStore.getSettings();
     
+    // Check if dreaming is enabled in settings
+    if (settings?.general?.dreamingEnabled === false) {
+      logger.info('DreamService', 'Dream cycle is disabled in settings. Skipping.');
+      return;
+    }
+
+    const sessions = sessionLogger.getUnprocessedSessions();
     if (sessions.length === 0) {
       logger.info('DreamService', 'No new sessions to process.');
       return;
     }
 
     try {
-      const apiKey = jsonStore.getSettings()?.general?.apiKey || process.env.VITE_GEMINI_API_KEY;
+      const apiKey = settings?.general?.apiKey;
       if (!apiKey) {
-        logger.warn('DreamService', 'API Key missing. Cannot run dream analysis.');
+        logger.warn('DreamService', 'API Key missing in settings. Cannot run dream analysis.');
         return;
       }
 
@@ -60,8 +67,11 @@ class DreamService {
       const promptTemplate = fs.readFileSync(path.join(__dirname, '../../prompts/dreamService.md'), 'utf-8');
       const prompt = promptTemplate.replace('{{combinedLogs}}', combinedLogs);
 
+      const dreamingModel = settings?.general?.dreamingModel || 'gemini-2.5-flash';
+      logger.info('DreamService', `Generating dream insights using model: ${dreamingModel}`);
+
       const response = await client.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: dreamingModel,
         contents: prompt,
         config: {
           temperature: 0.2

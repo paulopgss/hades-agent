@@ -1,6 +1,7 @@
 const { ipcMain, BrowserWindow } = require('electron');
 const jsonStore = require('../store/jsonStore');
 const logger = require('../services/logger');
+const registerGlobalShortcuts = require('../shortcuts');
 
 /**
  * Applies or removes content protection (Stealth Mode) on all active windows.
@@ -56,6 +57,9 @@ function registerSettingsHandlers() {
       jsonStore.saveSettings(settings);
       applyStealthMode(settings.general.stealthMode);
       applyApiKey(settings.general.apiKey);
+      
+      // Update global shortcuts dynamically on save
+      registerGlobalShortcuts();
 
       // Notify all active windows that settings have been updated
       const allWindows = BrowserWindow.getAllWindows();

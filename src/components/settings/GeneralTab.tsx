@@ -10,6 +10,7 @@ interface GeneralTabProps {
 
 const GeneralTab: React.FC<GeneralTabProps> = ({ settings, updateSettings }) => {
   const [showKey, setShowKey] = useState(false);
+  const [showTavilyKey, setShowTavilyKey] = useState(false);
 
   return (
     <div>
@@ -53,6 +54,41 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ settings, updateSettings }) => 
             }}
           >
             {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-info">
+          <div className="setting-title">Tavily Search API</div>
+        </div>
+        <div className="setting-control" style={{ position: 'relative' }}>
+          <input 
+            type={showTavilyKey ? "text" : "password"}
+            className="settings-input"
+            aria-label="API Key do Tavily"
+            placeholder="Insira sua API Key do Tavily..."
+            value={settings.tavilyApiKey || ''}
+            onChange={(e) => updateSettings({ tavilyApiKey: e.target.value })}
+            style={{ paddingRight: '40px' }}
+          />
+          <button 
+            type="button"
+            aria-label={showTavilyKey ? "Ocultar chave" : "Mostrar chave"}
+            onClick={() => setShowTavilyKey(!showTavilyKey)}
+            style={{
+              position: 'absolute',
+              right: '10px',
+              background: 'transparent',
+              border: 'none',
+              color: 'rgba(255,255,255,0.5)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            {showTavilyKey ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
         </div>
       </div>
@@ -128,6 +164,46 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ settings, updateSettings }) => 
             />
             <span className="slider"></span>
           </label>
+        </div>
+      </div>
+
+      <div className="section-header">
+        <span>🌙 Sistema de Dreaming (Memória e Aprendizado)</span>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-info">
+          <div className="setting-title">Ativar Dreaming</div>
+          <div className="setting-desc">Permite que o Hades consolide aprendizados das conversas e interações em segundo plano.</div>
+        </div>
+        <div className="setting-control">
+          <label className="switch" aria-label="Ativar Dreaming">
+            <input 
+              type="checkbox" 
+              aria-label="Ativar Dreaming"
+              checked={settings.dreamingEnabled ?? true}
+              onChange={(e) => updateSettings({ dreamingEnabled: e.target.checked })}
+            />
+            <span className="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-info">
+          <div className="setting-title">Modelo do Dreaming</div>
+          <div className="setting-desc">Escolha o modelo que processará os diários de sessões para gerar novas memórias.</div>
+        </div>
+        <div className="setting-control">
+          <select 
+            className="settings-select"
+            aria-label="Modelo do Dreaming"
+            value={settings.dreamingModel || 'gemini-2.5-flash'}
+            onChange={(e) => updateSettings({ dreamingModel: e.target.value })}
+            disabled={!(settings.dreamingEnabled ?? true)}
+          >
+            {MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
         </div>
       </div>
     </div>

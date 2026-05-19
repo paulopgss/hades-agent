@@ -27,3 +27,10 @@ yarn-error.log*
 graphify-out/
 scratch/
 
+# Reference docs and UI references
+SKILL.md
+STRUCTURE.md
+Sussuro e sugestões popup.md
+UI Design references/
+opencode.json
+

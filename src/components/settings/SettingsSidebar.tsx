@@ -1,6 +1,6 @@
 import React from 'react';
 import { SettingsTab } from '../../hooks/useSettings';
-import { Clock, Volume2, Settings as SettingsIcon } from 'lucide-react';
+import { Clock, Volume2, Settings as SettingsIcon, Keyboard } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: SettingsTab;
@@ -37,6 +37,16 @@ const SettingsSidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) =>
       >
         <SettingsIcon size={16} />
         <span>Configurações</span>
+      </button>
+
+      <button 
+        type="button"
+        className={`sidebar-item ${activeTab === 'shortcuts' ? 'active' : ''}`}
+        onClick={() => setActiveTab('shortcuts')}
+        style={{ marginTop: 'auto' }}
+      >
+        <Keyboard size={16} />
+        <span>Teclas de Atalho</span>
       </button>
     </div>
   );

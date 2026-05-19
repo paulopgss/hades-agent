@@ -8,6 +8,7 @@ import SettingsSidebar from './settings/SettingsSidebar';
 import HistoryTab from './settings/HistoryTab';
 import AudioTab from './settings/AudioTab';
 import GeneralTab from './settings/GeneralTab';
+import ShortcutsTab from './settings/ShortcutsTab';
 
 const Settings: React.FC = () => {
   const {
@@ -18,6 +19,7 @@ const Settings: React.FC = () => {
     isSaving,
     updateAudioSettings,
     updateGeneralSettings,
+    updateShortcutsSettings,
     saveAll
   } = useSettings();
 
@@ -63,6 +65,13 @@ const Settings: React.FC = () => {
             <GeneralTab 
               settings={settings.general} 
               updateSettings={updateGeneralSettings} 
+            />
+          )}
+
+          {activeTab === 'shortcuts' && (
+            <ShortcutsTab 
+              settings={settings.shortcuts} 
+              updateSettings={updateShortcutsSettings} 
             />
           )}
         </div>

@@ -121,15 +121,26 @@ export interface AudioSettings {
 
 export interface GeneralSettings {
   apiKey: string;
+  tavilyApiKey: string;
   minichatModel: string;
   sttModel: string;
   fullTranscriptionModel: string;
   stealthMode: boolean;
+  dreamingEnabled: boolean;
+  dreamingModel: string;
+}
+
+export interface ShortcutsSettings {
+  toggleCommand: string;
+  toggleSettings: string;
+  toggleSusurro: string;
+  toggleVoice: string;
 }
 
 export interface SettingsData {
   audio: AudioSettings;
   general: GeneralSettings;
+  shortcuts?: ShortcutsSettings;
 }
 
 declare global {
