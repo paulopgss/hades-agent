@@ -1,4 +1,4 @@
-# Hades Agent 🌋
+# Hades Agent <img src="https://res.cloudinary.com/YOUR_CLOUDINARY_USER/image/upload/v123456/hades-tray-icon.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" />
 
 <table>
   <tr>
@@ -9,7 +9,7 @@
       <img src="https://img.shields.io/badge/React-19.0-red?style=for-the-badge&logo=react&logoColor=61DAFB&color=150202" alt="React" />
     </td>
     <td width="65%" valign="top">
-      <h1>Hades Agent 🌋</h1>
+      <h1>Hades Agent <img src="https://res.cloudinary.com/YOUR_CLOUDINARY_USER/image/upload/v123456/hades-tray-icon.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
       <p><strong>The floating, super-smart, and invisible desktop AI assistant that learns from you!</strong></p>
       <p>Hades Agent is an ultra-lightweight AI companion that lives on your computer in an entirely new way. Instead of being stuck inside a browser tab, it floats freely over your open windows, listens and talks to you in real-time, searches the web in seconds, and automatically hides from screen recordings to keep your data 100% safe!</p>
       <p>Built with <strong>Electron</strong>, <strong>React</strong>, <strong>Vite</strong>, and powered by Google's cutting-edge <strong>Gemini Multimodal Live API</strong>, Hades is engineered to be extremely fast, secure, and smart.</p>
@@ -50,6 +50,14 @@ Imagine having a personal assistant who is like a superhero on your computer:
 ### 🔒 Bank-Grade Encrypted Storage (Zero .env Leaks!)
 *   **For Users:** No complex configuration files to edit. Just open the Settings panel (`Alt+S`), paste your Google Gemini and Tavily API keys, and click **Save**. Hades secures them with strong encryption instantly.
 *   **Technical Details:** Uses a secure symmetric encryption wrapper powered by **AES-256-CBC** with keys derived using **scrypt** based on your OS username. Secret keys are never stored in plain text.
+
+### 📋 Task Management (To-Do & Reminders)
+*   **For Users:** Schedule and list your daily tasks and quick reminders directly inside Hades! Keep your workflow organized without needing external notebook apps.
+*   **Technical Details:** Implemented through custom IPC task handlers that serialize and persist task structures to a secure, locally encrypted database file managed by `jsonStore.js`.
+*   **⚠️ Current Task Limitations:**
+    *   **Local Storage Only:** All tasks are kept fully offline on your own machine. There is no cloud sync, meaning your tasks never leave your computer.
+    *   **No Active OS Notifications:** Currently, the scheduler acts as a lightning-fast interactive to-do ledger. It does not issue system-level audio alarms or desktop push notifications when a task's target time is reached.
+    *   **No Automated Actions:** Scheduled tasks do not trigger active shell commands, scripts, or automated web browsing actions.
 
 ---
 
