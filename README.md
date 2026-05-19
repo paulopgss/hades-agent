@@ -4,9 +4,11 @@
   <tr>
     <td width="35%" align="center" valign="middle">
       <img src="public/icon/icon.png" width="340" style="border-radius: 48px; border: 6px solid #ff2a2a; box-shadow: 0 20px 50px rgba(255, 42, 42, 0.5); display: block; margin-bottom: 20px;" alt="Hades Agent Logo" />
-      <img src="https://img.shields.io/badge/License-MIT-red?style=for-the-badge&color=150202" alt="License" />
-      <img src="https://img.shields.io/badge/Electron-42.0-red?style=for-the-badge&logo=electron&logoColor=white&color=150202" alt="Electron" />
-      <img src="https://img.shields.io/badge/React-19.0-red?style=for-the-badge&logo=react&logoColor=61DAFB&color=150202" alt="React" />
+      <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; margin-top: 10px;">
+        <img src="https://img.shields.io/badge/License-MIT-red?style=for-the-badge&color=150202" alt="License" />
+        <img src="https://img.shields.io/badge/Electron-42.0-red?style=for-the-badge&logo=electron&logoColor=white&color=150202" alt="Electron" />
+        <img src="https://img.shields.io/badge/React-19.0-red?style=for-the-badge&logo=react&logoColor=61DAFB&color=150202" alt="React" />
+      </div>
     </td>
     <td width="65%" valign="top">
       <h1>Hades Agent <img src="https://res.cloudinary.com/YOUR_CLOUDINARY_USER/image/upload/v123456/hades-tray-icon.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
