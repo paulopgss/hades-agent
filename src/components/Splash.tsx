@@ -83,7 +83,7 @@ const Splash: React.FC = () => {
           }}
         >
           <img
-            src="/icon/icon.png"
+            src="./icon/icon.png"
             alt="Hades Icon"
             style={{
               width: '100%',
