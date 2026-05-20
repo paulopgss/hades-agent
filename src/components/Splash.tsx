@@ -24,13 +24,13 @@ const Splash: React.FC = () => {
   }, []);
 
   let opacity = 0;
-  let transform = 'scale(0.92) translateY(12px)';
+  let transform = 'translateY(12px)';
 
   if (phase === 'visible') {
     opacity = 1;
-    transform = 'scale(1) translateY(0px)';
+    transform = 'translateY(0px)';
   } else if (phase === 'leaving') {
-    transform = 'scale(1.03) translateY(-12px)';
+    transform = 'translateY(-12px)';
   }
 
   // Premium, continuous transition that is always active

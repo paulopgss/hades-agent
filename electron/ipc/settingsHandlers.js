@@ -17,6 +17,9 @@ function applyStealthMode(enabled) {
       const match = /\?window=([^&]+)/.exec(url);
       const name = match ? match[1] : win.getTitle() || 'unknown';
       
+      // Do not apply stealth mode to the splash screen
+      if (name === 'splash') return;
+      
       try {
         const result = win.setContentProtection(enabled);
         console.log(`[SETTINGS_STEALTH] Window: ${name} (alwaysOnTop: ${win.isAlwaysOnTop()}, visible: ${win.isVisible()}) -> setContentProtection(${enabled}): ${result}`);

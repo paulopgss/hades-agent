@@ -119,13 +119,15 @@ class WindowManager {
     // Apply stealth mode to newly created windows BEFORE they are shown.
     // On Windows, setting this AFTER the window is shown on a transparent window fails to apply to the DWM surface.
     try {
-      const store = require('../store/jsonStore');
-      const settings = store.getSettings();
-      const isStealth = !!settings?.general?.stealthMode;
-      console.log(`[WINDOW_MANAGER] Initializing stealth mode for ${name}. isStealth: ${isStealth}, alwaysOnTop: ${win.isAlwaysOnTop()}`);
-      
-      const success = win.setContentProtection(isStealth);
-      console.log(`[WINDOW_MANAGER] Initial stealth mode applied for ${name}: ${success}`);
+      if (name !== 'splash') {
+        const store = require('../store/jsonStore');
+        const settings = store.getSettings();
+        const isStealth = !!settings?.general?.stealthMode;
+        console.log(`[WINDOW_MANAGER] Initializing stealth mode for ${name}. isStealth: ${isStealth}, alwaysOnTop: ${win.isAlwaysOnTop()}`);
+        
+        const success = win.setContentProtection(isStealth);
+        console.log(`[WINDOW_MANAGER] Initial stealth mode applied for ${name}: ${success}`);
+      }
     } catch (e) {
       console.error(`[WINDOW_MANAGER] Failed to apply initial stealth mode for ${name}:`, e);
     }

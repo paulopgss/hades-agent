@@ -31,7 +31,8 @@
       "package.json"
     ],
     "win": {
-      "target": ["nsis", "portable"]
+      "target": ["nsis", "portable", "zip"],
+      "icon": "public/icon/hades-tray-icon.ico"
     },
     "portable": {
       "artifactName": "Hades-Agent-${version}-portable.exe"
