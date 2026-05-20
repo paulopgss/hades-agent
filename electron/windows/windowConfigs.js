@@ -209,7 +209,7 @@ const windowConfigs = {
   },
   settings: {
     width: 820,
-    height: 580,
+    height: 600,
     frame: false,
     transparent: true,
     hasShadow: false,
@@ -230,7 +230,7 @@ const windowConfigs = {
       const { width: sw, height: sh } = screen.getPrimaryDisplay().workAreaSize;
       win.setPosition(
         Math.floor((sw - 820) / 2),
-        Math.floor((sh - 580) / 2)
+        Math.floor((sh - 600) / 2)
       );
     }
   }
