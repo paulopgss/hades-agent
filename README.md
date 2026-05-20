@@ -15,7 +15,7 @@
       </p>
     </td>
     <td width="65%" valign="top">
-      <h1>Hades Agent <img src="https://res.cloudinary.com/YOUR_CLOUDINARY_USER/image/upload/v123456/hades-tray-icon.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
+      <h1>Hades Agent <img src="https://res.cloudinary.com/dmii83n8i/image/upload/v1779237864/icon-tray-round_gkqtv0.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
       <p><strong>The floating, super-smart, and invisible desktop AI assistant that learns from you!</strong></p>
       <p>Hades Agent is an ultra-lightweight AI companion that lives on your computer in an entirely new way. Instead of being stuck inside a browser tab, it floats freely over your open windows, listens and talks to you in real-time, searches the web in seconds, and automatically hides from screen recordings to keep your data 100% safe!</p>
       <p>Built with <strong>Electron</strong>, <strong>React</strong>, <strong>Vite</strong>, and powered by Google's cutting-edge <strong>Gemini Multimodal Live API</strong>, Hades is engineered to be extremely fast, secure, and smart.</p>
