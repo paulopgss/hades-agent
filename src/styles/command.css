@@ -68,6 +68,8 @@
   background: rgba(8, 4, 4, 0.7);
   backdrop-filter: blur(10px);
   position: relative;
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
 }
 
 .footer-btn {
