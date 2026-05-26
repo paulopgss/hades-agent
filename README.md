@@ -48,14 +48,12 @@ cd hades-agent
 npm install
 ```
 
-### 3. Configurar Variáveis de Ambiente
+### 3. Configurar a Chave de API
 
-Crie um arquivo `.env` na raiz do projeto (mesmo nível do `package.json`).
-
-```bash
-# Exemplo do arquivo .env
-GEMINI_API_KEY=sua_chave_de_api_aqui
-```
+Não é necessário criar um arquivo `.env` manualmente. Ao iniciar o aplicativo pela primeira vez, você pode configurar sua chave de API diretamente na interface do sistema:
+1. Abra as **Configurações** clicando no ícone de engrenagem ou pressionando o atalho global `Alt + S`.
+2. Insira sua chave do **Google Gemini API**.
+3. A chave será criptografada e salva localmente pelo Electron de forma segura.
 
 ### 4. Executar em Ambiente de Desenvolvimento
 
@@ -168,21 +166,19 @@ Isso criará uma pasta `release/` na raiz do seu projeto contendo:
 
 ---
 
-## Environment Variables
+## Configurações e Chaves de API
 
-O sistema requer algumas chaves para funcionar perfeitamente.
+O sistema gerencia chaves de forma dinâmica e segura, sem a necessidade de arquivos `.env` expostos na raiz.
 
-### Variáveis Obrigatórias
+### Como Configurar
 
-Crie um arquivo `.env` na raiz do projeto (mesmo nível de `package.json`).
-
-| Variable         | Description                                     | Example                                  |
+| Configuração     | Descrição                                       | Onde Encontrar / Inserir                 |
 | ---------------- | ----------------------------------------------- | ---------------------------------------- |
-| `GEMINI_API_KEY` | Chave de API do Google Gemini para a IA e o chat| `AIzaSyB...`                             |
+| `GEMINI_API_KEY` | Chave de API do Google Gemini para a IA e o chat| Menu de Configurações (`Alt + S`)        |
 
 ### Acesso via Electron
 
-O arquivo `.env` é lido nativamente pelo pacote `dotenv` no `main.js` do Electron e repassado aos serviços backend (`aiService.js`, `geminiLiveService.js`). Não tente importar diretamente no React (`Vite`), deixe o Backend gerenciar o token.
+A chave inserida na UI de Configurações é repassada aos serviços backend (`aiService.js`, `geminiLiveService.js`) usando o processo do Electron (via `ipcRenderer.invoke`). O Backend salva essas configurações e as gerencia de forma isolada, evitando que chaves de acesso sejam trafegadas inseguramente ou vazadas na construção da aplicação web pelo Vite.
 
 ---
 
