@@ -14,8 +14,8 @@
     </td>
     <td width="65%" valign="top" style="padding-left: 20px;">
       <h1 style="margin-top: 0; margin-bottom: 8px;">Hades Agent <img src="https://res.cloudinary.com/dmii83n8i/image/upload/v1779302517/hades-tray-icon-128_dks55n.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
-      <p><strong>O Hades Agent é um assistente virtual inteligente para desktop (Windows), construído com Electron e React. Ele funciona como um "floating widget" que oferece chat de texto avançado e um poderoso modo de transcrição por voz com insights em tempo real via Gemini Live.</strong></p>
-      <p><strong>Limites de Segurança:</strong> Sandboxed com <strong>zero acesso de gravação no sistema</strong> (não pode criar, editar ou deletar arquivos locais nativamente pelo chat). A inteligência foca inteiramente no suporte e produtividade da interface.</p>
+      <p><strong>Hades Agent is an intelligent virtual desktop assistant (Windows), built with Electron and React. It functions as a "floating widget" that offers advanced text chat and a powerful voice transcription mode with real-time insights via Gemini Live.</strong></p>
+      <p><strong>Security Boundaries:</strong> Sandboxed with <strong>zero write access to the system</strong> (cannot natively create, edit, or delete local files via chat). The intelligence is entirely focused on interface support and productivity.</p>
     </td>
   </tr>
 </table>
@@ -29,121 +29,121 @@
 
 ## Key Features
 
-- **MiniChat:** Um chat flutuante minimalista, conversando diretamente com a IA, projetado para acesso rápido e atalhos globais.
-- **Modo Susurro (Insights em Tempo Real):** Muito mais que um simples gravador de voz. Ao ativar o modo "Sugestões/Insights", o Hades deixa de atuar apenas como um transcritor e passa a ouvir ativamente o seu contexto. Ele funciona como um *parceiro de brainstorming*, identificando perguntas, problemas ou tópicos de discussão em tempo real e fornecendo ideias, respostas rápidas e soluções diretamente na tela. O modelo foi estritamente instruído (via `insight_rules.md`) a ser conciso, ágil e a ocultar monólogos internos (CoT), entregando apenas o valor final diretamente para você ler enquanto fala.
-- **Histórico Persistente:** O aplicativo salva automaticamente suas sessões de texto e áudio no backend, gerando títulos inteligentes baseados no contexto da conversa.
-- **Overlay & Glassmorphism UI:** Design premium com transparências fluidas, menus laterais e alta responsividade.
-- **Redimensionamento Nativo:** Loop de redimensionamento de janela otimizado em nível de sistema (`requestAnimationFrame` + IPC fast-fire) para desempenho imaculado em Windows.
+- **MiniChat:** A minimalist floating chat, conversing directly with the AI, designed for quick access and global shortcuts.
+- **Susurro Mode (Real-Time Insights):** Much more than a simple voice recorder. By activating the "Suggestions/Insights" mode, Hades stops acting just as a transcriber and actively listens to your context. It works as a *brainstorming partner*, identifying questions, problems, or discussion topics in real time and providing ideas, quick answers, and solutions directly on the screen. The model has been strictly instructed (via `insight_rules.md`) to be concise, agile, and to hide internal monologues (CoT), delivering only the final value directly for you to read while speaking.
+- **Persistent History:** The application automatically saves your text and audio sessions in the backend, generating smart titles based on the context of the conversation.
+- **Overlay & Glassmorphism UI:** Premium design with fluid transparency, side menus, and high responsiveness.
+- **Native Resizing:** System-level optimized window resizing loop (`requestAnimationFrame` + IPC fast-fire) for immaculate performance on Windows.
 
 ---
 
 ## Tech Stack
 
-- **Linguagem:** TypeScript / JavaScript (Node.js + Browser)
-- **Framework Desktop:** Electron (v42+)
+- **Language:** TypeScript / JavaScript (Node.js + Browser)
+- **Desktop Framework:** Electron (v42+)
 - **Frontend:** React 19 + Vite 8
-- **Estilização:** CSS Vanilla puro com CSS Variables & Backdrop Filters
-- **IA e APIs:** `@google/genai`, `@google/generative-ai`, `@google-cloud/speech`
-- **Áudio:** `recordrtc`
-- **Empacotador:** `electron-builder`
+- **Styling:** Pure Vanilla CSS with CSS Variables & Backdrop Filters
+- **AI and APIs:** `@google/genai`, `@google/generative-ai`, `@google-cloud/speech`
+- **Audio:** `recordrtc`
+- **Packager:** `electron-builder`
 
 ---
 
 ## Prerequisites
 
-- Node.js 20 ou superior.
-- NPM ou pnpm.
-- Uma chave de API válida do **Google Gemini API**.
-- SO: Windows (o empacotamento é focado em `.exe` e portable apps no Windows).
+- Node.js 20 or higher.
+- NPM or pnpm.
+- A valid **Google Gemini API** key.
+- OS: Windows (packaging is focused on `.exe` and portable apps on Windows).
 
 ---
 
 ## Getting Started
 
-### 1. Clonar o Repositório
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/seuperfil/hades-agent.git
+git clone https://github.com/victorl-dev/Hades-Agent.git
 cd hades-agent
 ```
 
-### 2. Instalar as Dependências
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Configurar a Chave de API
+### 3. Configure the API Key
 
-Não é necessário criar um arquivo `.env` manualmente. Ao iniciar o aplicativo pela primeira vez, você pode configurar sua chave de API diretamente na interface do sistema:
-1. Abra as **Configurações** clicando no ícone de engrenagem ou pressionando o atalho global `Alt + S`.
-2. Insira sua chave do **Google Gemini API**.
-3. A chave será criptografada e salva localmente pelo Electron de forma segura.
+It is not necessary to create a `.env` file manually. When starting the application for the first time, you can configure your API key directly in the system interface:
+1. Open the **Settings** by clicking the gear icon or pressing the global shortcut `Alt + S`.
+2. Enter your **Google Gemini API** key.
+3. The key will be securely encrypted and saved locally by Electron.
 
-### 4. Executar em Ambiente de Desenvolvimento
+### 4. Run in Development Environment
 
-O comando abaixo iniciará paralelamente o Vite (para compilar o React) e o Electron (sua janela nativa).
+The command below will start Vite (to compile React) and Electron (your native window) in parallel.
 
 ```bash
 npm run dev
 ```
 
-*Nota: Em caso de travamentos residuais, o comando automaticamente mata portas 3000 presas e finaliza processos zumbis do Electron.*
+*Note: In case of residual crashes, the command automatically kills stuck 3000 ports and terminates zombie Electron processes.*
 
 ---
 
 ## Architecture
 
-O Hades Agent utiliza uma arquitetura unificada de Janela Única. O estado principal de aplicação alterna as interfaces internas, mantendo a janela do Electron viva e redimensionando de acordo.
+Hades Agent uses a unified Single Window architecture. The main application state toggles the internal interfaces, keeping the Electron window alive and resizing accordingly.
 
 ### Directory Structure
 
 ```
-├── electron/                 # Funcionalidades do Processo Main (Electron)
-│   ├── main.js               # Ponto de entrada do Electron
-│   ├── windowManager.js      # Criação da janela, bounds e drag
-│   ├── ipcHandlers.js        # Handlers IPC para gerenciar estado, arquivos e eventos
-│   └── services/             # Serviços do Backend
-│       ├── aiService.js      # Integração base do Gemini
-│       └── geminiLiveService.js # WebSocket para o Gemini Live (streaming)
-├── public/                   # Arquivos estáticos e ícones
-├── src/                      # Código Fonte Frontend (React)
-│   ├── App.tsx               # Controlador principal e roteador (MiniChat ↔ Susurro)
-│   ├── components/           # Componentes UI
-│   │   ├── chat/             # UI do MiniChat (Header, Body, Input)
-│   │   ├── susurro/          # UI do gravador e insights (SusurroHeader, Overlay)
-│   │   └── common/           # Menus, ícones e overlays compartilhados
+├── electron/                 # Main Process Functionality (Electron)
+│   ├── main.js               # Electron entry point
+│   ├── windowManager.js      # Window creation, bounds, and drag
+│   ├── ipcHandlers.js        # IPC Handlers to manage state, files, and events
+│   └── services/             # Backend Services
+│       ├── aiService.js      # Base Gemini integration
+│       └── geminiLiveService.js # WebSocket for Gemini Live (streaming)
+├── public/                   # Static files and icons
+├── src/                      # Frontend Source Code (React)
+│   ├── App.tsx               # Main controller and router (MiniChat ↔ Susurro)
+│   ├── components/           # UI Components
+│   │   ├── chat/             # MiniChat UI (Header, Body, Input)
+│   │   ├── susurro/          # Recorder and insights UI (SusurroHeader, Overlay)
+│   │   └── common/           # Shared menus, icons, and overlays
 │   ├── hooks/                # Custom React Hooks
-│   ├── styles/               # CSS global e específico por componente
-│   ├── types/                # Definições TypeScript
-│   └── main.tsx              # Ponto de inicialização do React
-├── prompts/                  # Instruções de contexto para os agentes IA
-├── package.json              # Configurações do npm e Electron Builder
-└── vite.config.ts            # Configurações de build do Vite
+│   ├── styles/               # Global and component-specific CSS
+│   ├── types/                # TypeScript Definitions
+│   └── main.tsx              # React initialization point
+├── prompts/                  # Context instructions for AI agents
+├── package.json              # npm and Electron Builder configurations
+└── vite.config.ts            # Vite build configurations
 ```
 
 ### Data Flow & IPC
 
-O Hades comunica sua interface gráfica (React) com as APIs e manipulação de arquivos (Node.js) através do `contextBridge` definido no `preload.js`. 
+Hades communicates its graphical interface (React) with APIs and file manipulation (Node.js) through the `contextBridge` defined in `preload.js`. 
 
 ```
-Ação do Usuário (React) 
+User Action (React) 
   → window.electronAPI (Preload) 
     → ipcMain.on / handle (Node.js / Electron) 
-      → aiService.js ou sessions.json
-        → window.webContents.send (Resposta pro React)
+      → aiService.js or sessions.json
+        → window.webContents.send (Response to React)
 ```
 
 ### Key Components
 
-**Sistema de Sessões (`sessions.json`)**
-- As transcrições e conversas são salvas em formato de sessão. O aplicativo solicita que a IA gere um título curto e salva permanentemente no HD.
+**Sessions System (`sessions.json`)**
+- Transcriptions and conversations are saved in session format. The application asks the AI to generate a short title and permanently saves it to the HDD.
 
-**Redimensionamento em Tempo Real (`windowManager.js`)**
-- Usamos o padrão IPC `resize-window-fast` ao invés de canais IPC com promessas. O cliente dispara via `requestAnimationFrame` eventos rápidos de mouse, permitindo que a janela Electron seja arrastada e expandida a 60fps sem delay de Main-Thread.
+**Real-Time Resizing (`windowManager.js`)**
+- We use the `resize-window-fast` IPC pattern instead of promise-based IPC channels. The client fires fast mouse events via `requestAnimationFrame`, allowing the Electron window to be dragged and expanded at 60fps without Main-Thread delay.
 
-**Gemini Live Integrado**
-- Em modo Susurro, ativamos `isSuggestionsMode` no streaming WebSocket do Gemini. Isso instrui o modelo de IA a retornar insights instantâneos filtrando seus próprios "Internal Monologues" para não poluir a visualização final do usuário.
+**Integrated Gemini Live**
+- In Susurro mode, we activate `isSuggestionsMode` in the Gemini WebSocket streaming. This instructs the AI model to return instant insights filtering its own "Internal Monologues" to avoid polluting the user's final view.
 
 ---
 
@@ -151,95 +151,95 @@ Ação do Usuário (React)
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Inicia servidor de desenvolvimento (React + Electron) com Auto-Reload. |
-| `npm run build` | Faz o build de produção apenas da camada React. |
-| `npm run package` | Constrói o executável do Electron para Windows (`.exe`). |
-| `npm run dist` | Faz o build do React e logo em seguida empacota em formato instalável (`nsis`) e portátil (`portable`). |
-| `npm run test` | Roda testes com o Vitest. |
+| `npm run dev` | Starts development server (React + Electron) with Auto-Reload. |
+| `npm run build` | Builds production only for the React layer. |
+| `npm run package` | Builds the Electron executable for Windows (`.exe`). |
+| `npm run dist` | Builds React and then packages it into installable (`nsis`) and portable formats. |
+| `npm run test` | Runs tests with Vitest. |
 
 ---
 
 ## Deployment & Packaging
 
-Para distribuir a aplicação, utilize o `electron-builder` que já está devidamente configurado no `package.json`.
+To distribute the application, use `electron-builder` which is properly configured in `package.json`.
 
-### Gerando Instaladores (Windows)
+### Generating Installers (Windows)
 
 ```bash
 npm run dist
 ```
 
-Isso criará uma pasta `release/` na raiz do seu projeto contendo:
-- `Hades-Agent-Setup-1.0.0.exe` (Instalador tradicional)
-- `Hades-Agent-1.0.0-portable.exe` (Standalone app)
-- Arquivos `.zip` e descompactados opcionais.
+This will create a `release/` folder in the root of your project containing:
+- `Hades-Agent-Setup-2.0.0.exe` (Traditional installer)
+- `Hades-Agent-2.0.0-portable.exe` (Standalone app)
+- `.zip` files and optional unpacked files.
 
 ---
 
 ## Troubleshooting
 
-### Erros de Porta Presa (Port 3000)
-**Problema:** O Vite informa que a porta 3000 já está em uso.
-**Solução:** O script `npm run dev` tenta matar a porta via `kill-port`. Caso persista, execute no terminal do Windows: 
+### Stuck Port Errors (Port 3000)
+**Problem:** Vite reports that port 3000 is already in use.
+**Solution:** The `npm run dev` script tries to kill the port via `kill-port`. If it persists, run in the Windows terminal: 
 `npx kill-port 3000`
 
-### A Janela Trava ao Redimensionar
-**Solução:** Certifique-se de que não haja nenhum componente CSS fazendo `transition: all` no `.app-container`. Transições de layout CSS atreladas com o ResizeObserver do Electron travam a Main Thread do SO.
+### Window Freezes on Resize
+**Solution:** Make sure there is no CSS component doing `transition: all` on `.app-container`. CSS layout transitions tied with Electron's ResizeObserver freeze the OS Main Thread.
 
-### Gemini API Retornando Erro
-**Solução:** Verifique se o seu `.env` foi carregado corretamente. Como o arquivo fica na raiz do Electron, o `dotenv` inicializado no `main.js` fará a leitura. 
+### Gemini API Returning Error
+**Solution:** Verify if your `.env` was loaded correctly. Since the file is at the root of Electron, `dotenv` initialized in `main.js` will read it. 
 
 ---
 
-## Configurações e Chaves de API
+## Settings and API Keys
 
-O sistema gerencia chaves de forma dinâmica e segura, sem a necessidade de arquivos `.env` expostos na raiz.
+The system manages keys dynamically and securely, without the need for exposed `.env` files in the root.
 
-### Como Configurar
+### How to Configure
 
-| Configuração     | Descrição                                       | Onde Encontrar / Inserir                 |
-| ---------------- | ----------------------------------------------- | ---------------------------------------- |
-| `GEMINI_API_KEY` | Chave de API do Google Gemini para a IA e o chat| Menu de Configurações (`Alt + S`)        |
+| Setting | Description | Where to Find / Insert |
+| --- | --- | --- |
+| `GEMINI_API_KEY` | Google Gemini API Key for AI and chat | Settings Menu (`Alt + S`) |
 
-### Acesso via Electron
+### Access via Electron
 
-A chave inserida na UI de Configurações é repassada aos serviços backend (`aiService.js`, `geminiLiveService.js`) usando o processo do Electron (via `ipcRenderer.invoke`). O Backend salva essas configurações e as gerencia de forma isolada, evitando que chaves de acesso sejam trafegadas inseguramente ou vazadas na construção da aplicação web pelo Vite.
+The key entered in the Settings UI is passed to the backend services (`aiService.js`, `geminiLiveService.js`) using the Electron process (via `ipcRenderer.invoke`). The Backend saves these settings and manages them in isolation, preventing access keys from being insecurely transmitted or leaked when building the web application with Vite.
 
 ---
 
 ## Testing
 
-O ambiente está configurado para usar o **Vitest** devido à integração nativa com o Vite.
+The environment is configured to use **Vitest** due to native integration with Vite.
 
-### Executando Testes
+### Running Tests
 
 ```bash
-# Rodar todos os testes no modo watch
+# Run all tests in watch mode
 npm run test
 
-# Para rodar uma vez na integração contínua (CI)
+# To run once in continuous integration (CI)
 npx vitest run
 ```
 
-*Nota: Os testes ainda podem ser expandidos para cobrir as integrações de IPC (Inter-Process Communication) utilizando mocks para os módulos nativos do Electron.*
+*Note: Tests can still be expanded to cover IPC (Inter-Process Communication) integrations using mocks for native Electron modules.*
 
 ---
 
 ## Contributing
 
-Se quiser contribuir com o projeto:
-1. Faça um Fork do repositório.
-2. Crie uma branch para a sua feature (`git checkout -b feature/minha-feature`).
-3. Comite suas mudanças (`git commit -m 'feat: adiciona minha feature'`).
-4. Faça o push para a branch (`git push origin feature/minha-feature`).
-5. Abra um Pull Request.
+If you want to contribute to the project:
+1. Fork the repository.
+2. Create a branch for your feature (`git checkout -b feature/my-feature`).
+3. Commit your changes (`git commit -m 'feat: add my feature'`).
+4. Push to the branch (`git push origin feature/my-feature`).
+5. Open a Pull Request.
 
 ---
 
 ## License
 
-Este projeto está licenciado sob a **MIT License**.
+This project is licensed under the **MIT License**.
 
-A licença MIT é uma licença open-source permissiva, simples e clara. Ela permite livremente a utilização, cópia, modificação, mesclagem, publicação, distribuição, sublicenciamento e/ou venda de cópias deste software, desde que o aviso de copyright e o aviso de permissão sejam incluídos em todas as cópias ou partes substanciais do Software.
+The MIT License is a short and simple permissive license with conditions only requiring preservation of copyright and license notices. Licensed works, modifications, and larger works may be distributed under different terms and without source code.
 
 Copyright (c) 2026, Victor L. Oliveira
