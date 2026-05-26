@@ -140,8 +140,7 @@ input:disabled + .switch-slider {
   top: 52px;
   right: 12px;
   width: 200px;
-  background: rgba(15, 15, 15, 0.8);
-  backdrop-filter: blur(20px) saturate(180%);
+  background: rgba(15, 15, 15, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   padding: 6px;
