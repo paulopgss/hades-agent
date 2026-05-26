@@ -10,7 +10,6 @@ interface SusurroHeaderProps {
   tokens: number;
   isTranscribing: boolean;
   isConnecting: boolean;
-  isPinned: boolean;
   isGlobalTranslationEnabled: boolean;
   targetLanguage: string;
   targetLanguageLabel: string;
@@ -20,7 +19,6 @@ interface SusurroHeaderProps {
   setMenuView: (view: MenuView) => void;
   setTargetLanguage: (lang: string) => void;
   setTargetLanguageLabel: (label: string) => void;
-  togglePin: () => void;
   handleMinimize: () => void;
   handleToggleGlobalTranslation: () => void;
   isSuggestionsEnabled: boolean;
@@ -315,13 +313,7 @@ export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
           )}
         </div>
 
-        <button 
-          className={`action-btn pin-btn ${props.isPinned ? 'active' : ''}`}
-          onClick={props.togglePin}
-          title={props.isPinned ? "Desafixar" : "Fixar no topo"}
-        >
-          <Pin size={16} />
-        </button>
+
 
         <div className="font-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '2px', WebkitAppRegion: 'no-drag' as React.CSSProperties }}>
           <button className="action-btn" onClick={props.decreaseFontSize} title="Diminuir fonte">

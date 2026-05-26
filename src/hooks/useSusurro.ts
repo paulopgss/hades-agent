@@ -33,6 +33,8 @@ export const useSusurro = (isActive: boolean = true) => {
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const [susurroPushToTalk, setSusurroPushToTalk] = useState(false);
+
   // --- Refs ---
   const chatEndRef = useRef<HTMLDivElement>(null);
   const isActiveRef = useRef(isActive);
@@ -42,7 +44,7 @@ export const useSusurro = (isActive: boolean = true) => {
   }, [isActive]);
 
   // --- Sub-Hooks ---
-  const { isPinned, togglePin, handleMinimize } = useWindowControl();
+  const { handleMinimize } = useWindowControl();
   const { copiedId, copyToClipboard } = useClipboard();
   const [isClosingSession, setIsClosingSession] = useState(false);
   
@@ -54,7 +56,7 @@ export const useSusurro = (isActive: boolean = true) => {
     deletePersona
   } = usePersonas();
 
-  const { isTranscribing, isConnecting, startTranscriptionHades, stopTranscriptionHades } = useTranscription(
+  const { isTranscribing, isConnecting, startTranscriptionHades, stopTranscriptionHades, toggleTranscriptionHades, endTurnHades } = useTranscription(
     selectedPersona,
     isSuggestionsEnabled,
     isGlobalTranslationEnabled,
@@ -64,6 +66,11 @@ export const useSusurro = (isActive: boolean = true) => {
   );
 
   useTranslation(messages, setMessages, targetLanguage, isTranscribing);
+
+  const isPushToTalkRef = useRef(susurroPushToTalk);
+  useEffect(() => {
+    isPushToTalkRef.current = susurroPushToTalk;
+  }, [susurroPushToTalk]);
 
   // --- Effects ---
   useEffect(() => {
@@ -94,6 +101,9 @@ export const useSusurro = (isActive: boolean = true) => {
       if (settings?.audio?.micVolume !== undefined) {
         setInputVolume(settings.audio.micVolume / 100);
       }
+      if (settings?.general?.susurroPushToTalk !== undefined) {
+        setSusurroPushToTalk(settings.general.susurroPushToTalk);
+      }
     });
 
     const timerInterval = setInterval(() => setTimer(prev => prev + 1), 1000);
@@ -107,22 +117,45 @@ export const useSusurro = (isActive: boolean = true) => {
         e.preventDefault();
         e.stopPropagation();
         (document.activeElement as HTMLElement)?.blur();
-        startTranscriptionHades();
+        if (isPushToTalkRef.current) {
+          if (!isTranscribing && !isConnecting) {
+             startTranscriptionHades();
+          }
+        } else {
+          toggleTranscriptionHades(); // Toggle mode
+        }
       }
     };
+    
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (!isActiveRef.current) return;
+      if (e.key === ' ') {
+        if (!isPushToTalkRef.current) return; // Only do this in push to talk
+        e.preventDefault();
+        e.stopPropagation();
+        // In push-to-talk mode, release stops the full session (not just the turn)
+        stopTranscriptionHades();
+      }
+    };
+
     globalThis.addEventListener('keydown', handleKeyDown);
+    globalThis.addEventListener('keyup', handleKeyUp);
 
     return () => {
       globalThis.removeEventListener('keydown', handleKeyDown);
+      globalThis.removeEventListener('keyup', handleKeyUp);
       clearInterval(timerInterval);
     };
-  }, []);
+  }, [isTranscribing, isConnecting, startTranscriptionHades, stopTranscriptionHades, toggleTranscriptionHades, endTurnHades]);
 
   // Listen for live settings updates from the main process
   useEffect(() => {
     const unsubscribe = electronService.onSettingsUpdated((settings) => {
       if (settings?.audio?.micVolume !== undefined) {
         setInputVolume(settings.audio.micVolume / 100);
+      }
+      if (settings?.general?.susurroPushToTalk !== undefined) {
+        setSusurroPushToTalk(settings.general.susurroPushToTalk);
       }
     });
     return () => {
@@ -208,13 +241,13 @@ export const useSusurro = (isActive: boolean = true) => {
     autoScroll, setAutoScroll,
 
     // Window/UI
-    isPinned, togglePin, handleMinimize,
+    handleMinimize,
     copiedId, copyToClipboard,
     chatEndRef,
     handleScroll,
 
     // Transcription
-    isTranscribing, isConnecting, startTranscriptionHades, stopTranscriptionHades,
+    isTranscribing, isConnecting, startTranscriptionHades, stopTranscriptionHades, toggleTranscriptionHades, endTurnHades,
 
     // Handlers
     handleToggleGlobalTranslation,
@@ -229,6 +262,7 @@ export const useSusurro = (isActive: boolean = true) => {
     onCloseSession: handleCloseSession,
     currentSessionId,
     setCurrentSessionId,
-    isClosingSession
+    isClosingSession,
+    susurroPushToTalk
   };
 };

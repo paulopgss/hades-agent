@@ -30,7 +30,7 @@ function toggleCommandWindow() {
 
   console.log('[SHORTCUTS] --- INITIAL STATE ---');
   logWinState('CHAT', chatWin);
-  console.log(`[SHORTCUTS] chatHasMessages=${appState.chatHasMessages} isChatPinned=${appState.isChatPinned}`);
+  console.log(`[SHORTCUTS] chatHasMessages=${appState.chatHasMessages}`);
   console.log(`[SHORTCUTS] Currently focused window: ${BrowserWindow.getFocusedWindow()?.getTitle?.() || 'NONE (external app)'}`);
   
   if (!chatWin) {
@@ -122,19 +122,6 @@ function registerGlobalShortcuts(retryCount = 0) {
 
   // Toggle Settings
   if (!registerShortcut('Settings', shortcuts.toggleSettings || 'Alt+S', toggleSettingsWindow)) allRegistered = false;
-
-  // Toggle Susurro (Live Transcription)
-  if (!registerShortcut('Susurro', shortcuts.toggleSusurro || 'Alt+B', () => {
-    const win = windowManager.get('susurro') || windowManager.createSusurroWindow();
-    if (win.isVisible()) {
-      win.hide();
-    } else {
-      windowManager.hideAllExcept(['susurro', 'suggestions']);
-      win.show();
-      win.focus();
-      win.webContents.send('force-susurro-mode');
-    }
-  })) allRegistered = false;
 
   // Retry if any shortcut failed (zombie process may still be releasing)
   if (allRegistered) {

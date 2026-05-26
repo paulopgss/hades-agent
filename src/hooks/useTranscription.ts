@@ -135,43 +135,27 @@ export const useTranscription = (
     isConnectingRef.current = isConnecting;
   }, [isConnecting]);
 
-  /**
-   * Toggles the live transcription session.
-   */
-  const toggleTranscription = useCallback(async () => {
-    console.log(`[TRANSCRIPTION] Toggle requested. State: isTranscribing=${isTranscribingRef.current}, isConnecting=${isConnectingRef.current}`);
-
-    if (isTranscribingRef.current || isConnectingRef.current) {
-      electronService.stopSusurroLive();
-      stopRecording();
-
-      // Flush any pending deltas immediately on manual stop
-      if (pendingDeltaRef.current.length > 0) {
-        processDeltas(pendingDeltaRef.current);
-        pendingDeltaRef.current = [];
-      }
-      if (deltaTimeoutRef.current) {
-        clearTimeout(deltaTimeoutRef.current);
-        deltaTimeoutRef.current = null;
-      }
-
-      // handleStatusUpdate will catch the 'closed' signal and cleanup
-      return;
-    }
-
+  const startTranscription = useCallback(async () => {
+    if (isTranscribingRef.current || isConnectingRef.current) return;
     setIsConnecting(true);
-    const success = await electronService.startSusurroLive(
+    
+    const response = await electronService.startSusurroLive(
       settingsRef.current.selectedPersona?.systemPrompt,
       settingsRef.current.isSuggestionsEnabled
     );
 
-    if (!success) {
+    // If we've already been told to stop while waiting, abort
+    if (!isConnectingRef.current && !isTranscribingRef.current) {
+        electronService.stopSusurroLive();
+        return;
+    }
+
+    if (!response || !response.success) {
+      console.error('[TRANSCRIPTION] Backend failed to start Gemini Live:', response?.error || 'Unknown error');
       setIsConnecting(false);
       return;
     }
 
-    // Once the backend says it started successfully, we can start capturing audio.
-    // The 'ready' status from backend will set isTranscribing=true via handleStatusUpdate.
     const started = await startRecording({
       isSystemAudio: true,
       onChunk: (base64, seq) => {
@@ -184,7 +168,32 @@ export const useTranscription = (
       electronService.stopSusurroLive();
       setIsConnecting(false);
     }
-  }, [startRecording, stopRecording]);
+  }, [startRecording]);
+
+  const stopTranscription = useCallback(() => {
+    if (!isTranscribingRef.current && !isConnectingRef.current) return;
+    
+    setIsConnecting(false);
+    electronService.stopSusurroLive();
+    stopRecording();
+
+    if (pendingDeltaRef.current.length > 0) {
+      processDeltas(pendingDeltaRef.current);
+      pendingDeltaRef.current = [];
+    }
+    if (deltaTimeoutRef.current) {
+      clearTimeout(deltaTimeoutRef.current);
+      deltaTimeoutRef.current = null;
+    }
+  }, [stopRecording, processDeltas]);
+
+  const toggleTranscription = useCallback(() => {
+    if (isTranscribingRef.current || isConnectingRef.current) {
+      stopTranscription();
+    } else {
+      startTranscription();
+    }
+  }, [startTranscription, stopTranscription]);
 
   // Sync gain node with volume state
   useEffect(() => {
@@ -235,10 +244,19 @@ export const useTranscription = (
     };
   }, [processDeltas, handleStatusUpdate, toggleTranscription]);
 
+  const endTurnHades = useCallback(() => {
+    if (isTranscribingRef.current) {
+      console.log('[TRANSCRIPTION] Sending manual turnComplete signal');
+      electronService.susurroEndTurn();
+    }
+  }, []);
+
   return {
     isTranscribing,
     isConnecting,
-    startTranscriptionHades: toggleTranscription,
-    stopTranscriptionHades: toggleTranscription
+    startTranscriptionHades: startTranscription,
+    stopTranscriptionHades: stopTranscription,
+    toggleTranscriptionHades: toggleTranscription,
+    endTurnHades
   };
 };

@@ -38,8 +38,7 @@ class ElectronService {
   async closeWindow() { await this.handleResponse(this.electron?.closeWindow(), undefined, 'closeWindow'); }
   async minimizeWindow() { await this.handleResponse(this.electron?.minimizeWindow(), undefined, 'minimizeWindow'); }
   async resizeWindow(width: number, height: number) { await this.handleResponse(this.electron?.resizeWindow(width, height), undefined, 'resizeWindow'); }
-  togglePin() { this.electron?.togglePin(); }
-  async isPinned() { return await this.electron?.isPinned() ?? false; }
+
   async isMinimized() { return await this.electron?.isMinimized() ?? false; }
   isMaximized() { return this.electron?.isMaximized() ?? Promise.resolve(false); }
   resizeWindowFast(width: number, height: number) { this.electron?.resizeWindowFast(width, height); }
@@ -92,12 +91,22 @@ class ElectronService {
   chatWindowReady() { this.electron?.chatWindowReady(); }
 
   // --- Susurro ---
-  async startSusurroLive(personaPrompt?: string, isSuggestionsMode?: boolean) { 
-    return await this.handleResponse(this.electron?.startSusurroLive(personaPrompt, isSuggestionsMode), false, 'startSusurroLive'); 
+  async startSusurroLive(personaPrompt?: string, isSuggestionsMode?: boolean) {
+    // IMPORTANT: return the raw IPCResponse envelope {success, data, error} so the
+    // caller (useTranscription) can inspect .success. Do NOT unwrap via handleResponse.
+    try {
+      const response = await this.electron?.startSusurroLive(personaPrompt, isSuggestionsMode);
+      console.log('[ElectronService] startSusurroLive raw response:', JSON.stringify(response));
+      return response ?? { success: false, error: 'No IPC response' };
+    } catch (error) {
+      console.error('[ElectronService] startSusurroLive exception:', error);
+      return { success: false, error: String(error) };
+    }
   }
   async stopSusurroLive() { 
     return await this.handleResponse(this.electron?.stopSusurroLive(), undefined, 'stopSusurroLive'); 
   }
+  susurroEndTurn() { this.electron?.susurroEndTurn(); }
   sendSusurroChunk(base64: string, seq: number) { this.electron?.sendSusurroChunk(base64, seq); }
   onSusurroLiveDelta(callback: (delta: any) => void) {
     return this.electron?.onSusurroLiveDelta(callback) || (() => {});
@@ -186,7 +195,7 @@ class ElectronService {
   async getSystemAudioSourceId() { 
     return await this.handleResponse(this.electron?.getSystemAudioSourceId(), '', 'getSystemAudioSourceId'); 
   }
-  updateChatPin(pinned: boolean) { this.electron?.updateChatPin(pinned); }
+
   async getPersonas() { 
     return await this.handleResponse(this.electron?.getPersonas(), [], 'getPersonas'); 
   }

@@ -9,7 +9,7 @@ const path = require('node:path');
 const isPackaged = app.isPackaged;
 const baseUrl = isPackaged
   ? `file://${path.join(__dirname, '../../dist/index.html')}`
-  : 'http://localhost:3000';
+  : 'http://localhost:3333';
 
 const preloadPath = path.join(__dirname, '../../preload.js');
 
@@ -113,7 +113,7 @@ const windowConfigs = {
     frame: false,
     transparent: true,
     hasShadow: false,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     show: false,
     resizable: true,
     minWidth: 200,
@@ -214,7 +214,7 @@ const windowConfigs = {
     frame: false,
     transparent: true,
     hasShadow: false,
-    alwaysOnTop: false,
+    alwaysOnTop: true,
     show: false,
     resizable: false,
     backgroundColor: '#00000000',

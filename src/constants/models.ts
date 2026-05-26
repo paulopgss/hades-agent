@@ -10,7 +10,13 @@ export const MODELS = [
   { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', tag: 'Fast' }
 ] as const;
 
+export const LIVE_MODELS = [
+  { id: 'models/gemini-2.5-flash-native-audio-latest', name: 'Gemini 2.5 Flash Live', tag: 'Stable' },
+
+] as const;
+
 export const DEFAULT_MODEL = 'gemini-2.5-flash';
+export const DEFAULT_LIVE_MODEL = 'models/gemini-2.5-flash-live-001';
 
 export type AIModel = (typeof MODELS)[number]['id'];
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { SettingsData } from '../../types/electron';
-import { MODELS } from '../../constants/models';
+import { MODELS, LIVE_MODELS } from '../../constants/models';
 import { Eye, EyeOff, Key, Cpu, Shield, Moon } from 'lucide-react';
 
 interface GeneralTabProps {
@@ -189,6 +189,23 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ settings, updateSettings }) => 
         </div>
       </div>
 
+      <div className="setting-row">
+        <div className="setting-info">
+          <div className="setting-title">Gemini Live (Tempo Real)</div>
+          <div className="setting-desc">Modelo usado para a conversa por voz.</div>
+        </div>
+        <div className="setting-control">
+          <select 
+            className="settings-select"
+            aria-label="Modelo do Gemini Live"
+            value={settings.liveModel || 'models/gemini-2.5-flash-native-audio-latest'}
+            onChange={(e) => updateSettings({ liveModel: e.target.value })}
+          >
+            {LIVE_MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+          </select>
+        </div>
+      </div>
+
       <div className="section-header">
         <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <Shield size={16} /> Privacidade
@@ -207,6 +224,24 @@ const GeneralTab: React.FC<GeneralTabProps> = ({ settings, updateSettings }) => 
               aria-label="Stealth Mode"
               checked={settings.stealthMode}
               onChange={(e) => updateSettings({ stealthMode: e.target.checked })}
+            />
+            <span className="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div className="setting-row">
+        <div className="setting-info">
+          <div className="setting-title">Modo Push-to-Talk (Susurro)</div>
+          <div className="setting-desc">Mude o funcionamento do microfone: Segurar para falar (Ativado) ou Clicar para Alternar (Desativado).</div>
+        </div>
+        <div className="setting-control">
+          <label className="switch" aria-label="Modo Push-to-Talk">
+            <input 
+              type="checkbox" 
+              aria-label="Modo Push-to-Talk"
+              checked={settings.susurroPushToTalk ?? false}
+              onChange={(e) => updateSettings({ susurroPushToTalk: e.target.checked })}
             />
             <span className="slider"></span>
           </label>

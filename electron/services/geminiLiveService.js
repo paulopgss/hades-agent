@@ -47,14 +47,20 @@ class GeminiLiveService {
       (async () => {
         try {
           this.client = new GoogleGenAI({ apiKey });
-          
-          const model = "models/gemini-2.5-flash-native-audio-latest";
 
-          logger.info('GEMINI LIVE', `Connecting to session for model: ${model}`);
+          // Read model from user settings, fall back to the stable live model
+          const settings = jsonStore.getSettings();
+          const model = settings?.general?.liveModel || 'models/gemini-2.5-flash-native-audio-latest';
+
+          logger.info('GEMINI LIVE', `[INIT] ==================== SESSION START ====================`);
+          logger.info('GEMINI LIVE', `[INIT] Model: ${model}`);
+          logger.info('GEMINI LIVE', `[INIT] Mode: ${isSuggestionsMode ? 'Insights/Suggestions' : 'Transcription'}`);
+          logger.info('GEMINI LIVE', `[INIT] API Key present: ${!!apiKey} (length: ${apiKey?.length})`);
+          logger.info('GEMINI LIVE', `[INIT] Persona prompt length: ${personaPrompt?.length ?? 0} chars`);
           
           event.sender.send('susurro-live-status', 'connecting');
 
-          this.session = await this.client.live.connect({
+          const connectConfig = {
             model: model,
             config: {
               responseModalities: ["AUDIO"],
@@ -70,32 +76,38 @@ class GeminiLiveService {
             },
             callbacks: {
               onopen: () => {
-                logger.info('GEMINI LIVE', 'Session handshake complete. Ready for audio.');
+                logger.info('GEMINI LIVE', `[CONNECT] ✓ WebSocket open. Session handshake complete. Ready for audio.`);
                 this.isReady = true;
                 event.sender.send('susurro-live-status', 'ready');
               },
               onmessage: (msg) => {
+                logger.info('GEMINI LIVE', `[MSG_RAW] Keys: ${Object.keys(msg || {}).join(', ')}`);
                 this.handleServerMessage(msg, event);
               },
               onerror: (err) => {
-                logger.error('GEMINI LIVE', 'Session error encountered:', err);
+                logger.error('GEMINI LIVE', `[ERROR] Session error:`, JSON.stringify(err, Object.getOwnPropertyNames(err)));
                 event.sender.send('susurro-live-status', 'error');
                 resolve(false);
               },
               onclose: (e) => {
-                logger.info('GEMINI LIVE', `Session closed by server. Code: ${e.code}, Reason: ${e.reason || 'None'}`);
+                logger.info('GEMINI LIVE', `[CLOSE] Code: ${e.code}, Reason: ${e.reason || 'None'}, WasClean: ${e.wasClean}`);
                 event.sender.send('susurro-live-status', 'closed');
                 this.session = null;
                 this.isReady = false;
                 resolve(false);
               }
             }
-          });
+          };
+
+          logger.info('GEMINI LIVE', `[INIT] Calling client.live.connect() with model: ${model}`);
+          this.session = await this.client.live.connect(connectConfig);
+          logger.info('GEMINI LIVE', `[INIT] ✓ client.live.connect() returned. Session object type: ${typeof this.session}`);
 
           resolve(true);
 
         } catch (err) {
-          logger.error('GEMINI LIVE', 'Critical failure during session initialization:', err);
+          logger.error('GEMINI LIVE', `[CRITICAL] Session initialization failed: ${err?.message}`);
+          logger.error('GEMINI LIVE', `[CRITICAL] Stack: ${err?.stack}`);
           event.sender.send('susurro-live-status', 'error');
           this.session = null;
           this.isReady = false;
@@ -221,6 +233,20 @@ class GeminiLiveService {
     } else if (!this.isReady && !this._notifiedWaiting) {
       logger.warn('GEMINI LIVE', 'Audio chunk received but session not ready. Waiting for handshake...');
       this._notifiedWaiting = true;
+    }
+  }
+
+  /**
+   * Signals the end of the user's turn to the API.
+   */
+  endTurn() {
+    if (this.session && this.isReady) {
+      try {
+        this.session.sendClientContent({ turnComplete: true });
+        logger.info('GEMINI LIVE', 'Sent turnComplete: true');
+      } catch (err) {
+        logger.error('GEMINI LIVE', 'Failed to send turnComplete:', err);
+      }
     }
   }
 

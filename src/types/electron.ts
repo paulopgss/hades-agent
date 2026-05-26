@@ -12,8 +12,6 @@ export interface ElectronAPI {
   closeWindow: () => Promise<IPCResponse<void>>;
   minimizeWindow: () => Promise<IPCResponse<void>>;
   resizeWindow: (width: number, height: number) => Promise<IPCResponse<void>>;
-  togglePin: () => void;
-  isPinned: () => Promise<boolean>;
   isMinimized: () => Promise<boolean>;
   isMaximized: () => Promise<boolean>;
   resizeWindowFast: (width: number, height: number) => void;
@@ -84,7 +82,6 @@ export interface ElectronAPI {
   translateIncremental: (text: string, previousText: string, targetLanguage: string) => Promise<IPCResponse<string>>;
   transcribeAudio: (base64: string) => Promise<string>;
   getSystemAudioSourceId: () => Promise<IPCResponse<string>>;
-  updateChatPin: (pinned: boolean) => void;
   getPersonas: () => Promise<IPCResponse<any[]>>;
   savePersona: (persona: any) => Promise<IPCResponse<void>>;
   deletePersona: (id: string) => Promise<IPCResponse<void>>;
@@ -137,12 +134,13 @@ export interface GeneralSettings {
   stealthMode: boolean;
   dreamingEnabled: boolean;
   dreamingModel: string;
+  liveModel: string;
+  susurroPushToTalk?: boolean;
 }
 
 export interface ShortcutsSettings {
   toggleCommand: string;
   toggleSettings: string;
-  toggleSusurro: string;
   toggleVoice: string;
 }
 

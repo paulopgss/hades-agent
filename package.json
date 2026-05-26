@@ -5,8 +5,8 @@
   "main": "main.js",
   "scripts": {
     "dev:react": "vite",
-    "dev:electron": "wait-on http://localhost:3000 && electron .",
-    "dev": "taskkill /F /IM electron.exe 2>nul & npx kill-port 3000 && concurrently \"npm run dev:react\" \"npm run dev:electron\"",
+    "dev:electron": "wait-on http://localhost:3333 && electron .",
+    "dev": "taskkill /F /IM electron.exe 2>nul & npx kill-port 3333 && concurrently \"npm run dev:react\" \"npm run dev:electron\"",
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",

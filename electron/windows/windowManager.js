@@ -133,6 +133,14 @@ class WindowManager {
       win.webContents.send('window-resizing', false);
     });
 
+    win.on('minimize', (event) => {
+      event.preventDefault();
+      log.info(`[WINDOW_MANAGER] Prevented minimize for: ${name}`);
+      if (win.isMinimized()) {
+        win.restore();
+      }
+    });
+
     // Cleanup on close
     win.on('closed', () => {
       log.info(`[WINDOW_MANAGER] Window closed: ${name}`);
@@ -149,6 +157,7 @@ class WindowManager {
         console.log(`[WINDOW_MANAGER] Initializing stealth mode for ${name}. isStealth: ${isStealth}, alwaysOnTop: ${win.isAlwaysOnTop()}`);
         
         const success = win.setContentProtection(isStealth);
+        try { win.setSkipTaskbar(isStealth); } catch (e) {}
         console.log(`[WINDOW_MANAGER] Initial stealth mode applied for ${name}: ${success}`);
       }
     } catch (e) {
@@ -166,6 +175,7 @@ class WindowManager {
             const isStealth = !!settings?.general?.stealthMode;
             
             const success = win.setContentProtection(isStealth);
+            try { win.setSkipTaskbar(isStealth); } catch (e) {}
             console.log(`[WINDOW_MANAGER] [Enforce:${eventSource}:${delay}ms] for ${name} (alwaysOnTop: ${win.isAlwaysOnTop()}, visible: ${win.isVisible()}) -> setContentProtection(${isStealth}): ${success}`);
           } catch (e) {
             console.error(`[WINDOW_MANAGER] [Enforce:${eventSource}:${delay}ms] Failed for ${name}:`, e);
@@ -193,44 +203,10 @@ class WindowManager {
     const win = this.createWindow('command');
     
     win.on('blur', () => {
-      log.info('[WINDOW_MANAGER] >>> Command BLUR fired');
-      setTimeout(() => {
-        if (win.isDestroyed()) return;
-        if (win.isFocused()) {
-          log.info('[WINDOW_MANAGER] Command regained focus within 150ms, keeping visible');
-          return;
-        }
-        
-        // Se o DevTools estiver aberto, não esconde a janela no blur para permitir a depuração
-        if (win.webContents.isDevToolsOpened()) {
-          log.info('[WINDOW_MANAGER] DevTools estão abertos, mantendo a janela visível.');
-          return;
-        }
-        
-        const appState = require('../appState');
-        
-        // If a native file dialog is open, the blur is expected — do NOT hide.
-        if (appState.isFileDialogOpen) {
-          log.info('[WINDOW_MANAGER] >>> Command BLUR → file dialog open, keeping visible');
-          return;
-        }
-        
-        const focusedWin = BrowserWindow.getFocusedWindow();
-        const chatWin = this.get('chat');
-        const isChatFocused = focusedWin && focusedWin === chatWin;
-        
-        log.info(`[WINDOW_MANAGER] Command BLUR check: isChatFocused=${isChatFocused} focusedWin=${focusedWin ? 'APP_WINDOW' : 'NONE/EXTERNAL'} cmdVisible=${win.isVisible()}`);
-        
-        if (!isChatFocused && focusedWin !== win) {
-          log.info('[WINDOW_MANAGER] >>> Command BLUR → HIDING command + chat');
-          win.hide();
-          if (chatWin && !chatWin.isDestroyed() && !appState.isChatPinned) {
-            chatWin.hide();
-          }
-        } else {
-          log.info('[WINDOW_MANAGER] >>> Command BLUR → keeping visible (chat or command focused)');
-        }
-      }, 150);
+      log.info('[WINDOW_MANAGER] >>> Command BLUR fired, enforcing alwaysOnTop');
+      if (!win.isDestroyed() && win.isVisible()) {
+        win.setAlwaysOnTop(true, 'pop-up-menu');
+      }
     });
 
     win.on('close', (event) => {
@@ -246,38 +222,10 @@ class WindowManager {
     const win = this.createWindow('chat');
     
     win.on('blur', () => {
-      log.info('[WINDOW_MANAGER] >>> Chat BLUR fired');
-      setTimeout(() => {
-        if (win.isDestroyed()) return;
-        if (win.isFocused()) {
-          log.info('[WINDOW_MANAGER] Chat regained focus within 150ms, keeping visible');
-          return;
-        }
-        
-        const appState = require('../appState');
-        
-        // If a native file dialog is open, the blur is expected — do NOT hide.
-        if (appState.isFileDialogOpen) {
-          log.info('[WINDOW_MANAGER] >>> Chat BLUR → file dialog open, keeping visible');
-          return;
-        }
-
-        if (win.webContents.isDevToolsOpened()) {
-          log.info('[WINDOW_MANAGER] DevTools are open, keeping chat window visible.');
-          return;
-        }
-        
-        const focusedWin = BrowserWindow.getFocusedWindow();
-        
-        log.info(`[WINDOW_MANAGER] Chat BLUR check: isChatPinned=${appState.isChatPinned} focusedWin=${focusedWin ? 'APP_WINDOW' : 'NONE/EXTERNAL'} chatVisible=${win.isVisible()}`);
-        
-        if (!appState.isChatPinned && focusedWin !== win) {
-          log.info('[WINDOW_MANAGER] >>> Chat BLUR → HIDING chat');
-          win.hide();
-        } else {
-          log.info('[WINDOW_MANAGER] >>> Chat BLUR → keeping visible (pinned)');
-        }
-      }, 150);
+      log.info('[WINDOW_MANAGER] >>> Chat BLUR fired, enforcing alwaysOnTop');
+      if (!win.isDestroyed() && win.isVisible()) {
+        win.setAlwaysOnTop(true, 'pop-up-menu');
+      }
     });
 
     if (showActive) {
@@ -325,28 +273,16 @@ class WindowManager {
     const win = this.createWindow('susurro');
     
     win.on('blur', () => {
-      log.info('[WINDOW_MANAGER] Susurro window blurred, checking in 150ms');
-      setTimeout(() => {
-        if (win.isDestroyed()) return;
-        if (win.isFocused()) {
-          log.info('[WINDOW_MANAGER] Susurro window regained focus, keeping visible');
-          return;
-        }
-        
-        if (win.webContents.isDevToolsOpened()) {
-          log.info('[WINDOW_MANAGER] DevTools are open, keeping Susurro window visible.');
-          return;
-        }
-        const appState = require('../appState');
-        if (!appState.isSusurroPinned) {
-          win.hide();
-        }
-      }, 150);
+      log.info('[WINDOW_MANAGER] Susurro window blurred, enforcing alwaysOnTop');
+      if (!win.isDestroyed() && win.isVisible()) {
+        win.setAlwaysOnTop(true, 'pop-up-menu');
+      }
     });
 
-    win.on('minimize', () => {
-      log.info('[WINDOW_MANAGER] Susurro window minimized, stopping session');
-      win.webContents.send('stop-susurro');
+    win.on('minimize', (event) => {
+      event.preventDefault();
+      log.info('[WINDOW_MANAGER] Susurro window minimized, restoring to keep on top');
+      if (win.isMinimized()) win.restore();
     });
 
     win.on('hide', () => {

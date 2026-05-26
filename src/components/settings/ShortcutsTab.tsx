@@ -11,7 +11,6 @@ interface ShortcutsTabProps {
 const DEFAULTS = {
   toggleCommand: 'Alt+D',
   toggleSettings: 'Alt+S',
-  toggleSusurro: 'Alt+B',
   toggleVoice: 'Alt+V'
 };
 
@@ -23,7 +22,6 @@ const ShortcutsTab: React.FC<ShortcutsTabProps> = ({ settings = {}, updateSettin
   const activeShortcuts = {
     toggleCommand: settings?.toggleCommand || DEFAULTS.toggleCommand,
     toggleSettings: settings?.toggleSettings || DEFAULTS.toggleSettings,
-    toggleSusurro: settings?.toggleSusurro || DEFAULTS.toggleSusurro,
     toggleVoice: settings?.toggleVoice || DEFAULTS.toggleVoice
   };
 
@@ -129,11 +127,6 @@ const ShortcutsTab: React.FC<ShortcutsTabProps> = ({ settings = {}, updateSettin
       key: 'toggleSettings' as const,
       title: 'Menu de Configurações',
       desc: 'Abre ou esconde o painel central de configurações gerais e atalhos.',
-    },
-    {
-      key: 'toggleSusurro' as const,
-      title: 'Transcrição Live (Susurro)',
-      desc: 'Ativa ou desativa a captura e transcrição de áudio em tempo real.',
     },
     {
       key: 'toggleVoice' as const,

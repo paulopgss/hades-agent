@@ -41,7 +41,8 @@ class JsonStore {
         fullTranscriptionModel: 'gemini-2.5-flash',
         stealthMode: false,
         dreamingEnabled: true,
-        dreamingModel: 'gemini-2.5-flash'
+        dreamingModel: 'gemini-2.5-flash',
+        liveModel: 'models/gemini-2.5-flash-native-audio-latest'
       },
       shortcuts: {
         toggleCommand: 'Alt+D',
@@ -162,9 +163,23 @@ class JsonStore {
     this.cache.totalTokens = this.safeLoad(this.paths.tokens, { total: 0 }).total || 0;
     // Deep merge so new keys from defaultSettings survive missing fields in saved file
     const saved = this.safeLoadSettings();
+    const mergedGeneral = { ...this._defaultSettings.general, ...(saved.general || {}) };
+
+    // Migrate deprecated/invalid model IDs to the current working default
+    const DEPRECATED_LIVE_MODELS = [
+      'models/gemini-2.0-flash-exp',
+      'models/gemini-2.0-flash-live-001',
+      'models/gemini-2.5-flash-live-001',
+      'models/gemini-live-2.5-flash-preview',
+    ];
+    if (DEPRECATED_LIVE_MODELS.includes(mergedGeneral.liveModel)) {
+      console.log(`[STORE] Migrating invalid liveModel "${mergedGeneral.liveModel}" -> "models/gemini-2.5-flash-native-audio-latest"`);
+      mergedGeneral.liveModel = 'models/gemini-2.5-flash-native-audio-latest';
+    }
+
     this.cache.settings = {
       audio: { ...this._defaultSettings.audio, ...(saved.audio || {}) },
-      general: { ...this._defaultSettings.general, ...(saved.general || {}) },
+      general: mergedGeneral,
       shortcuts: { ...this._defaultSettings.shortcuts, ...(saved.shortcuts || {}) }
     };
 

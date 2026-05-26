@@ -86,7 +86,6 @@ const Susurro: React.FC<SusurroProps> = ({ activeMode = 'susurro', onSwitchMode 
           tokens={s.tokens}
           isTranscribing={s.isTranscribing}
           isConnecting={s.isConnecting}
-          isPinned={s.isPinned}
           isGlobalTranslationEnabled={s.isGlobalTranslationEnabled}
           targetLanguage={s.targetLanguage}
           targetLanguageLabel={s.targetLanguageLabel}
@@ -96,7 +95,6 @@ const Susurro: React.FC<SusurroProps> = ({ activeMode = 'susurro', onSwitchMode 
           setMenuView={s.setMenuView}
           setTargetLanguage={s.setTargetLanguage}
           setTargetLanguageLabel={s.setTargetLanguageLabel}
-          togglePin={s.togglePin}
           handleMinimize={s.handleMinimize}
           handleToggleGlobalTranslation={s.handleToggleGlobalTranslation}
           isSuggestionsEnabled={s.isSuggestionsEnabled}
@@ -135,9 +133,19 @@ const Susurro: React.FC<SusurroProps> = ({ activeMode = 'susurro', onSwitchMode 
 
           <button
             className={`compact-action-btn ${s.isTranscribing || s.isConnecting ? 'active' : ''}`}
-            onClick={s.startTranscriptionHades}
+            onClick={!s.susurroPushToTalk ? s.toggleTranscriptionHades : undefined}
+            onMouseDown={(e) => {
+              if (s.susurroPushToTalk && !s.isTranscribing && !s.isConnecting) {
+                s.startTranscriptionHades();
+              }
+            }}
+            onMouseUp={s.susurroPushToTalk ? s.stopTranscriptionHades : undefined}
+            onMouseLeave={s.susurroPushToTalk ? s.stopTranscriptionHades : undefined}
             disabled={s.isConnecting}
-            title={s.isTranscribing ? "Parar Gravação" : "Iniciar Gravação"}
+            title={s.susurroPushToTalk 
+              ? (s.isTranscribing ? "Solte para enviar" : "Segure para falar")
+              : (s.isTranscribing ? "Parar Gravação" : "Iniciar Gravação")
+            }
             style={{ 
               borderColor: s.isTranscribing ? 'rgba(239, 68, 68, 0.5)' : undefined,
               backgroundColor: s.isTranscribing ? 'rgba(239, 68, 68, 0.2)' : undefined
@@ -158,17 +166,7 @@ const Susurro: React.FC<SusurroProps> = ({ activeMode = 'susurro', onSwitchMode 
             <Languages size={14} color={s.isGlobalTranslationEnabled ? "var(--accent-light)" : "currentColor"} />
           </button>
 
-          <button
-            className={`compact-action-btn ${s.isPinned ? 'active' : ''}`}
-            onClick={s.togglePin}
-            title={s.isPinned ? "Desafixar" : "Fixar no Topo"}
-          >
-            {s.isPinned ? (
-              <Pin size={14} fill="currentColor" color="var(--accent-light)" />
-            ) : (
-              <PinOff size={14} />
-            )}
-          </button>
+
 
           <div className="compact-font-controls" style={{ display: 'flex', alignItems: 'center', background: 'rgba(10, 10, 10, 0.6)', backdropFilter: 'blur(4px)', borderRadius: '6px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <button className="compact-action-btn" onClick={s.decreaseFontSize} title="Diminuir fonte" style={{ border: 'none', background: 'transparent' }}>
@@ -221,8 +219,19 @@ const Susurro: React.FC<SusurroProps> = ({ activeMode = 'susurro', onSwitchMode 
         <div className="susurro-footer">
           <button
             className={`mic-trigger ${s.isTranscribing || s.isConnecting ? 'active' : ''} ${s.isConnecting ? 'connecting' : ''}`}
-            onClick={s.startTranscriptionHades}
+            onClick={!s.susurroPushToTalk ? s.toggleTranscriptionHades : undefined}
+            onMouseDown={(e) => {
+              if (s.susurroPushToTalk && !s.isTranscribing && !s.isConnecting) {
+                s.startTranscriptionHades();
+              }
+            }}
+            onMouseUp={s.susurroPushToTalk ? s.stopTranscriptionHades : undefined}
+            onMouseLeave={s.susurroPushToTalk ? s.stopTranscriptionHades : undefined}
             disabled={s.isConnecting}
+            title={s.susurroPushToTalk 
+              ? (s.isTranscribing ? "Solte para enviar" : "Segure para falar")
+              : (s.isTranscribing ? "Parar Gravação" : "Iniciar Gravação")
+            }
           >
             <div className="mic-ring" />
             <div className="mic-ring-outer" />

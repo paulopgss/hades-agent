@@ -8,25 +8,8 @@ import { electronService } from '../services/electron';
  * events. The isResizing state is toggled via CSS class on the DOM root directly
  * to avoid React re-renders during the resize loop.
  */
-export const useWindowControl = (initialPinned = false) => {
-  const [isPinned, setIsPinned] = useState(initialPinned);
+export const useWindowControl = () => {
   const isResizingRef = useRef(false);
-
-  // Sync pin state on mount
-  useEffect(() => {
-    electronService.isPinned().then(pinned => {
-      setIsPinned(pinned);
-    });
-  }, []);
-
-  /**
-   * Toggles the window's "Always on Top" (pin) state.
-   */
-  const togglePin = () => {
-    const next = !isPinned;
-    setIsPinned(next);
-    electronService.updateChatPin(next);
-  };
 
   /**
    * Closes the current window.
@@ -55,8 +38,6 @@ export const useWindowControl = (initialPinned = false) => {
   }, []);
 
   return {
-    isPinned,
-    togglePin,
     handleMinimize,
   };
 };

@@ -27,7 +27,7 @@ export const useMiniChat = () => {
 
   const [currentModel, setCurrentModel] = useState<string>(DEFAULT_MODEL);
   const { isThinking, activeTool, handleAIResponse, cancelGeneration } = useGemini(currentModel, addMessage);
-  const { isPinned, togglePin, handleMinimize } = useWindowControl();
+  const { handleMinimize } = useWindowControl();
   const { copiedId, copyToClipboard } = useClipboard();
 
   const [tokens, setTokens] = useState<number>(() => {
@@ -169,7 +169,6 @@ export const useMiniChat = () => {
     isBusy,
     isThinking,
     activeTool,
-    isPinned,
     tokens,
     isSettingsOpen,
     menuView,
@@ -180,7 +179,6 @@ export const useMiniChat = () => {
     setCurrentModel: handleSelectModel,
     setIsSettingsOpen,
     setMenuView,
-    togglePin,
     handleMinimize,
     loadSession: (sessionId: string) => {
       cancelGeneration();

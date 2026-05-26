@@ -22,7 +22,6 @@ const MiniChat: React.FC<MiniChatProps> = ({ activeMode = 'chat', onSwitchMode }
     isThinking,
     activeTool,
     isBusy,
-    isPinned,
     tokens,
     isSettingsOpen,
     menuView,
@@ -32,7 +31,6 @@ const MiniChat: React.FC<MiniChatProps> = ({ activeMode = 'chat', onSwitchMode }
     setCurrentModel,
     setIsSettingsOpen,
     setMenuView,
-    togglePin,
     handleMinimize,
     clearHistory,
     loadSession,
@@ -120,9 +118,7 @@ const MiniChat: React.FC<MiniChatProps> = ({ activeMode = 'chat', onSwitchMode }
       <ChatHeader
         tokens={tokens}
         currentModel={currentModel}
-        isPinned={isPinned}
         isSettingsOpen={isSettingsOpen}
-        togglePin={togglePin}
         setIsSettingsOpen={setIsSettingsOpen}
         onMinimize={handleMinimize}
         onNewChat={() => clearHistory(true)}

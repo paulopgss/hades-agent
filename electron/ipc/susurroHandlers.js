@@ -96,6 +96,10 @@ function registerSusurroHandlers() {
     geminiLiveService.sendChunk(chunk);
   });
 
+  ipcMain.on('susurro-end-turn', (event) => {
+    geminiLiveService.endTurn();
+  });
+
   ipcMain.handle('susurro-start-live', async (event, personaPrompt, isSuggestionsMode) => {
     try {
       const started = await geminiLiveService.start(event, personaPrompt, isSuggestionsMode);

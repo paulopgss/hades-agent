@@ -22,6 +22,7 @@ function applyStealthMode(enabled) {
       
       try {
         const result = win.setContentProtection(enabled);
+        try { win.setSkipTaskbar(enabled); } catch (e) {}
         console.log(`[SETTINGS_STEALTH] Window: ${name} (alwaysOnTop: ${win.isAlwaysOnTop()}, visible: ${win.isVisible()}) -> setContentProtection(${enabled}): ${result}`);
       } catch (err) {
         console.error(`[SETTINGS_STEALTH] Failed to set content protection on ${name}:`, err);

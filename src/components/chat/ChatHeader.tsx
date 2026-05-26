@@ -6,9 +6,7 @@ import { electronService } from '../../services/electron';
 interface ChatHeaderProps {
   tokens: number;
   currentModel: string;
-  isPinned: boolean;
   isSettingsOpen: boolean;
-  togglePin: () => void;
   setIsSettingsOpen: (open: boolean) => void;
   onNewChat: () => void;
   onMinimize: () => void;
@@ -27,9 +25,7 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   tokens,
   currentModel,
-  isPinned,
   isSettingsOpen,
-  togglePin,
   setIsSettingsOpen,
   onNewChat,
   onMinimize,
@@ -225,13 +221,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <Settings2 size={16} />
         </button>
 
-        <button 
-          className={`action-btn pin-btn ${isPinned ? 'active' : ''}`}
-          onClick={togglePin}
-          title={isPinned ? "Desafixar" : "Fixar no topo"}
-        >
-          <Pin size={16} />
-        </button>
+
 
         {increaseFontSize && decreaseFontSize && (
           <div className="font-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '2px', WebkitAppRegion: 'no-drag' as React.CSSProperties }}>

@@ -32,12 +32,9 @@ contextBridge.exposeInMainWorld('electron', {
   resizeWindow: (w, h) => ipcRenderer.invoke('resize-window', { width: w, height: h }),
   showChat: () => ipcRenderer.send('show-chat'),
   showSusurro: () => ipcRenderer.send('show-susurro'),
-  togglePin: () => ipcRenderer.send('toggle-pin'),
-  isPinned: () => ipcRenderer.invoke('is-pinned'),
   isMinimized: () => ipcRenderer.invoke('is-minimized'),
   isMaximized: () => ipcRenderer.invoke('is-maximized'),
   resizeWindowFast: (w, h) => ipcRenderer.send('resize-window-fast', { width: w, height: h }),
-  updateChatPin: (pinned) => ipcRenderer.send('update-chat-pin', pinned),
   toggleMic: (enabled) => ipcRenderer.send('toggle-mic', enabled),
   toggleAudio: (enabled) => ipcRenderer.send('toggle-audio', enabled),
   onWindowResizing: (callback) => {
@@ -79,6 +76,7 @@ contextBridge.exposeInMainWorld('electron', {
   },
   startSusurroLive: (persona, isSuggestionsMode) => ipcRenderer.invoke('susurro-start-live', persona, isSuggestionsMode),
   stopSusurroLive: () => ipcRenderer.invoke('susurro-stop-live'),
+  susurroEndTurn: () => ipcRenderer.send('susurro-end-turn'),
   sendSusurroChunk: (base64, seq) => ipcRenderer.send('susurro-send-chunk', base64, seq),
   onSusurroLiveDelta: (callback) => {
     const sub = (_event, delta) => callback(delta);

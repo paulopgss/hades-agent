@@ -102,39 +102,6 @@ function registerWindowHandlers() {
     return null;
   });
 
-  /**
-   * Toggles the "always on top" state of the active window.
-   */
-  ipcMain.on('toggle-pin', (event) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win) {
-      const isPinned = win.isAlwaysOnTop();
-      win.setAlwaysOnTop(!isPinned);
-      
-      const chatWin = windowManager.get('chat');
-      const susurroWin = windowManager.get('susurro');
-      if (win === chatWin) {
-        appState.isChatPinned = !isPinned;
-      } else if (win === susurroWin) {
-        appState.isSusurroPinned = !isPinned;
-      }
-    }
-  });
-
-  /**
-   * Returns whether the active window is pinned.
-   */
-  ipcMain.handle('is-pinned', (event) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (!win) return false;
-    
-    // Return the user-facing pin state, not the internal alwaysOnTop (used for z-order)
-    const chatWin = windowManager.get('chat');
-    const susurroWin = windowManager.get('susurro');
-    if (win === chatWin) return appState.isChatPinned;
-    if (win === susurroWin) return appState.isSusurroPinned;
-    return win.isAlwaysOnTop();
-  });
 
   /**
    * Fast fire-and-forget resize for manual drag handles.
@@ -144,24 +111,6 @@ function registerWindowHandlers() {
     const win = BrowserWindow.fromWebContents(event.sender);
     if (win && !win.isDestroyed()) {
       win.setSize(Math.round(width), Math.round(height), false);
-    }
-  });
-
-  /**
-   * Specifically updates the chat/susurro pin state in appState.
-   */
-  ipcMain.on('update-chat-pin', (event, pinned) => {
-    const win = BrowserWindow.fromWebContents(event.sender);
-    if (win) {
-      win.setAlwaysOnTop(pinned);
-      
-      const chatWin = windowManager.get('chat');
-      const susurroWin = windowManager.get('susurro');
-      if (win === chatWin) {
-        appState.isChatPinned = pinned;
-      } else if (win === susurroWin) {
-        appState.isSusurroPinned = pinned;
-      }
     }
   });
 
