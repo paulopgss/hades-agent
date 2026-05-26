@@ -16,7 +16,8 @@ export interface ElectronAPI {
   isPinned: () => Promise<boolean>;
   isMinimized: () => Promise<boolean>;
   isMaximized: () => Promise<boolean>;
-  startResizing: () => void;
+  resizeWindowFast: (width: number, height: number) => void;
+  onWindowResizing: (callback: (isResizing: boolean) => void) => () => void;
   toggleMic: (enabled: boolean) => void;
   toggleAudio: (enabled: boolean) => void;
   
@@ -38,13 +39,14 @@ export interface ElectronAPI {
   getChat: () => Promise<IPCResponse<any[]>>;
   saveChat: (history: any[]) => void;
   updateChatStatus: (hasMessages: boolean) => void;
-  endSession: (type?: string) => Promise<IPCResponse<any>>;
+  endSession: (type?: string, keepOpen?: boolean) => Promise<IPCResponse<any>>;
+  loadSession: (sessionId: string) => Promise<IPCResponse<any[]>>;
   getTotalTokens: () => Promise<IPCResponse<number>>;
   updateTokens: (count: number) => Promise<IPCResponse<number>>;
   chatWindowReady: () => void;
   
   // Susurro (Live Transcription)
-  startSusurroLive: (personaPrompt?: string) => Promise<IPCResponse<boolean>>;
+  startSusurroLive: (personaPrompt?: string, isSuggestionsMode?: boolean) => Promise<IPCResponse<boolean>>;
   stopSusurroLive: () => Promise<IPCResponse<void>>;
   sendSusurroChunk: (base64: string, seq: number) => void;
   onSusurroLiveDelta: (callback: (delta: any) => void) => () => void;
@@ -54,6 +56,8 @@ export interface ElectronAPI {
   onStopSusurro: (callback: () => void) => () => void;
   generateSuggestion: (data: { transcription: string, personaPrompt: string }) => Promise<IPCResponse<string>>;
   saveSusurroMessage: (msg: any) => Promise<IPCResponse<void>>;
+  saveSusurroHistory: (history: any[]) => void;
+  getSusurroHistory: () => Promise<IPCResponse<any[]>>;
   
   // Tools & IPC
   openFileDialog: () => Promise<string | null>;

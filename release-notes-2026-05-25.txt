@@ -1,0 +1,53 @@
+# 🚀 Hades Agent Release Notes - v[Insira a Versão] (25/05/2026)
+
+Esta atualização traz um conjunto massivo de refatorações arquiteturais, melhorias de performance no Electron, estabilização de estado (React/IPC) e refinamento de UI/UX. Abaixo está o detalhamento técnico e funcional das alterações realizadas.
+
+---
+
+## ✨ Novas Funcionalidades (Features)
+
+### Gemini Live: Filtro de Chain of Thought (Monólogos Internos)
+- **Implementação no `GeminiLiveService`:** Adicionada uma nova camada de interceptação na stream da API do Gemini. O sistema agora faz o parsing dos objetos `parts` em tempo real e identifica a flag `thought: true`.
+- **Limpeza do Fluxo:** Todo o conteúdo de raciocínio (internal monologue / Chain of Thought) da IA agora é ativamente filtrado e descartado do output. O frontend passa a receber estritamente o texto final e formatado (consumer-facing text), eliminando a "poluição" visual no chat de respostas inacabadas.
+
+### LinkedIn Bot: Nova Estrutura de Geração
+- **Atualização do `generation_rules.md`:** Refatoração completa das instruções de prompt do bot de LinkedIn. A persona adotada passou a ser estritamente "Copywriter Sênior".
+- **Nova Estrutura (Pirâmide Invertida):** A geração de posts agora segue obrigatoriamente a estrutura: *Hook* (Gancho) -> *Fact* (Fato) -> *Impact* (Impacto) -> *Application* (Aplicação) -> *CTA/Source* -> *Hashtags*.
+- **Remoção de Legado:** Removida a exigência legada para links de imagens de capa, focando puramente em textos de alta legibilidade.
+
+---
+
+## 🛠️ Performance e Core (Electron & IPC)
+
+### Novo Motor de Redimensionamento e Drag (Window Manager)
+- **Substituição do `startResizing` legado:** O rastreamento manual de eventos de mouse via JavaScript para gerenciar as bordas da janela no Electron foi completamente descartado.
+- **Implementação Nativa + `requestAnimationFrame`:** Desenvolvida uma nova estratégia "fire-and-forget", atrelada às otimizações nativas do Sistema Operacional e estrangulada (throttled) via `requestAnimationFrame` (rAF). O resultado é a erradicação de qualquer lag, travamento ou UI freezing ao redimensionar a janela.
+- **Refatoração do Preload e Drag:** Atualização da lógica de IPC entre os serviços principais e os scripts de preload, melhorando substancialmente o comportamento de movimentação da janela (`-webkit-app-region: drag`) tanto na interface MiniChat quanto Susurro.
+
+---
+
+## 🎨 UI/UX e Estilização
+
+### Padronização Visual e Sidebars (Susurro & MiniChat)
+- **Paridade de Janelas:** Padronizadas as dimensões de renderização das interfaces *Susurro* e *MiniChat*. Essa mudança arquitetural resolve desalinhamentos de ícones e inconsistências de padding que ocorriam ao alternar entre os modos.
+- **Refatoração do Navigation Menu:** O menu lateral (hamburguer) foi convertido para um modelo fluido, preenchendo toda a altura da tela, valendo-se de posicionamento absoluto (`position: absolute`) preciso e transições CSS de alta performance.
+
+### Correção do Comportamento do Cabeçalho (Headers)
+- **Z-Index e Desfoque (Blur):** Resolvido o bug onde ícones (especialmente configurações) não desfocavam ou ficavam "presos" por cima da sobreposição preta. Reescalamos a hierarquia: o `.settings-overlay` foi movido para `z-index: 2000`, e o `.sidebar-menu` para `z-index: 2001`. Os containers de botões que possuíam conflitos de `z-index` foram corrigidos.
+- **Visibilidade Condicional Removida:** Eliminada a lógica imperativa no `ChatHeader.tsx` que injetava `display: none` e a classe `.hidden` no botão de configurações (`Settings2`) quando o menu estava aberto, permitindo o comportamento natural de renderização e cobertura.
+
+---
+
+## 🐛 Correções de Bugs (Bug Fixes)
+
+### Persistência de Dados Críticos no Susurro
+- **Correção da Race Condition:** Havia uma falha arquitetural (race condition) entre os eventos de fechamento/minimização do `windowManager` do Electron e a limpeza de estado local no hook `useSusurro.ts`.
+- **Sincronização com `sessions.json`:** Os manipuladores `end-session` foram ajustados para bloquear a limpeza do estado da transcrição *antes* que a sessão seja integralmente processada, titulada e persistida na store do backend.
+- **Feedback de Loading:** Implementados estados visuais (loading states) durante a finalização do áudio/transcrição para impedir que o usuário encerre o app antes do processamento seguro dos dados.
+
+### Estabilidade e Limpeza da Base de Código (Tech Debt)
+- **Falha de JSX Compilável Resolvida:** Corrigida uma quebra grave de árvore no DOM gerada por tags `<div>` que não fechavam corretamente no `ChatHeader.tsx`.
+- **Refatoração do `geminiLiveService.js`:** A complexidade ciclomática gigantesca desse arquivo foi reduzida, segmentando as responsabilidades de parsing.
+- **Limpeza de Arquivos Legados:** Remoção total de imports baseados em bibliotecas defasadas do Node.js, expurgo de dezenas de variáveis não utilizadas no `windowManager.js`.
+- **Refinamento CSS:** Remoção de seletores duplicados e redundantes do arquivo global `components.css`.
+- **Acessibilidade (a11y):** Inclusão e fixação de labels e estruturas que violavam diretrizes básicas de acessibilidade nos cabeçalhos.

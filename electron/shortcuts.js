@@ -4,15 +4,20 @@ const jsonStore = require('./store/jsonStore');
 const appState = require('./appState');
 
 /**
- * Toggles the command window and associated chat window.
+ * Toggles the chat window.
  */
 function toggleCommandWindow() {
   const { BrowserWindow } = require('electron');
   console.log('');
-  console.log('=== [SHORTCUTS] ============ TOGGLE COMMAND START ============');
+  console.log('=== [SHORTCUTS] ============ TOGGLE CHAT START ============');
   
-  const win = windowManager.get('command') || windowManager.createCommandWindow();
-  const chatWin = windowManager.get('chat');
+  let chatWin = windowManager.get('chat');
+  const isNew = !chatWin;
+
+  if (isNew) {
+    // Pass false to createChatWindow so it doesn't instantly steal focus before we check visibility
+    chatWin = windowManager.createChatWindow(false);
+  }
   
   const logWinState = (label, w) => {
     if (!w || w.isDestroyed()) {
@@ -24,62 +29,43 @@ function toggleCommandWindow() {
   };
 
   console.log('[SHORTCUTS] --- INITIAL STATE ---');
-  logWinState('COMMAND', win);
   logWinState('CHAT', chatWin);
   console.log(`[SHORTCUTS] chatHasMessages=${appState.chatHasMessages} isChatPinned=${appState.isChatPinned}`);
   console.log(`[SHORTCUTS] Currently focused window: ${BrowserWindow.getFocusedWindow()?.getTitle?.() || 'NONE (external app)'}`);
   
-  if (!win) {
-    console.error('[SHORTCUTS] Command window is null or undefined. ABORTING.');
+  if (!chatWin) {
+    console.error('[SHORTCUTS] Chat window is null or undefined. ABORTING.');
     return;
   }
   
-  if (win.isVisible()) {
+  // If the window is new, we always want to show it. Otherwise, toggle based on visibility.
+  if (!isNew && chatWin.isVisible()) {
     console.log('[SHORTCUTS] === ACTION: HIDE ALL ===');
     windowManager.hideAllWindows();
   } else {
     console.log('[SHORTCUTS] === ACTION: SHOW WINDOWS ===');
-    windowManager.hideAllExcept(['command', 'chat']);
+    windowManager.hideAllExcept(['chat']);
 
-    // Step 1: show chat FIRST (below command bar) if active session exists
-    if (chatWin && !chatWin.isDestroyed() && appState.chatHasMessages) {
-      console.log('[SHORTCUTS] --- STEP 1: SHOW CHAT ---');
-      console.log('[SHORTCUTS] calling chatWin.show()');
-      chatWin.show();
-      logWinState('CHAT after show()', chatWin);
-    } else {
-      console.log(`[SHORTCUTS] --- STEP 1: SKIP CHAT (exists=${!!chatWin} destroyed=${chatWin?.isDestroyed?.()} hasMessages=${appState.chatHasMessages}) ---`);
-    }
+    console.log('[SHORTCUTS] --- SHOW CHAT ---');
+    console.log('[SHORTCUTS] calling chatWin.show()');
+    chatWin.show();
+    logWinState('CHAT after show()', chatWin);
+    chatWin.focus();
+    chatWin.webContents.send('focus-input');
 
-    // Step 2: show command window ON TOP of chat and focus it
-    console.log('[SHORTCUTS] --- STEP 2: SHOW COMMAND ---');
-    console.log('[SHORTCUTS] calling win.show()');
-    win.show();
-    logWinState('COMMAND after show()', win);
-    console.log('[SHORTCUTS] calling win.focus()');
-    win.focus();
-    logWinState('COMMAND after focus()', win);
-    win.webContents.send('focus-input');
-
-    // Deferred state check — see what happened after OS compositor settles
+    // Deferred state check
     setTimeout(() => {
-      if (win.isDestroyed()) return;
-      console.log('[SHORTCUTS] --- DEFERRED CHECK (50ms) ---');
-      logWinState('COMMAND', win);
+      if (chatWin.isDestroyed()) return;
       logWinState('CHAT', chatWin);
-      console.log(`[SHORTCUTS] Currently focused window: ${BrowserWindow.getFocusedWindow()?.getTitle?.() || 'NONE (external app)'}`);
     }, 50);
 
     setTimeout(() => {
-      if (win.isDestroyed()) return;
-      console.log('[SHORTCUTS] --- DEFERRED CHECK (300ms) ---');
-      logWinState('COMMAND', win);
+      if (chatWin.isDestroyed()) return;
       logWinState('CHAT', chatWin);
-      console.log(`[SHORTCUTS] Currently focused window: ${BrowserWindow.getFocusedWindow()?.getTitle?.() || 'NONE (external app)'}`);
     }, 300);
   }
   
-  console.log('=== [SHORTCUTS] ============ TOGGLE COMMAND END ==============');
+  console.log('=== [SHORTCUTS] ============ TOGGLE CHAT END ==============');
   console.log('');
 }
 
@@ -87,7 +73,6 @@ function toggleCommandWindow() {
  * Toggles the settings window.
  */
 function toggleSettingsWindow() {
-  console.log('[SHORTCUTS] Toggle Settings pressed!');
   const win = windowManager.get('settings') || windowManager.createSettingsWindow();
   if (!win) {
     console.error('[SHORTCUTS] Settings window is null or undefined.');
@@ -118,7 +103,6 @@ function registerShortcut(name, key, handler) {
 
 /**
  * Registers global keyboard shortcuts for the application.
- * Handles toggling main windows and starting features via hotkeys.
  */
 function registerGlobalShortcuts(retryCount = 0) {
   // Wipe all active global shortcut registrations to prevent clashing and leaks when updating
@@ -128,8 +112,7 @@ function registerGlobalShortcuts(retryCount = 0) {
   const shortcuts = settings.shortcuts || {
     toggleCommand: 'Alt+D',
     toggleSettings: 'Alt+S',
-    toggleSusurro: 'Alt+B',
-    toggleVoice: 'Alt+V'
+    toggleSusurro: 'Alt+B'
   };
 
   let allRegistered = true;
@@ -151,20 +134,6 @@ function registerGlobalShortcuts(retryCount = 0) {
       win.focus();
       // Sinaliza o frontend para iniciar a conexão imediatamente
       win.webContents.send('start-susurro');
-    }
-  })) allRegistered = false;
-
-  // Trigger Voice Command
-  if (!registerShortcut('Voice', shortcuts.toggleVoice || 'Alt+V', () => {
-    const win = windowManager.get('voice') || windowManager.createVoiceWindow();
-    if (win.isVisible()) {
-      win.hide();
-    } else {
-      windowManager.hideAllExcept(['voice']);
-      win.show();
-      win.focus();
-      // Envia o evento para começar a gravar imediatamente após abrir
-      win.webContents.send('start-voice');
     }
   })) allRegistered = false;
 

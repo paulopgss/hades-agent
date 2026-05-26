@@ -19,18 +19,17 @@ export const useMiniChat = () => {
     isBusy,
     setIsBusy,
     addMessage,
-    clearHistory
+    clearHistory,
+    loadSession,
+    isLoadingSession,
+    currentSessionId
   } = useChatState();
 
   const [currentModel, setCurrentModel] = useState<string>(DEFAULT_MODEL);
-  const { isThinking, activeTool, handleAIResponse } = useGemini(currentModel, addMessage);
-  const { isPinned, isResizing, togglePin, handleMinimize, startResizing } = useWindowControl();
+  const { isThinking, activeTool, handleAIResponse, cancelGeneration } = useGemini(currentModel, addMessage);
+  const { isPinned, togglePin, handleMinimize } = useWindowControl();
   const { copiedId, copyToClipboard } = useClipboard();
 
-  const [timer, setTimer] = useState(() => {
-    const saved = localStorage.getItem('minichat_timer');
-    return saved ? parseInt(saved, 10) : 0;
-  });
   const [tokens, setTokens] = useState<number>(() => {
     const saved = localStorage.getItem('minichat_session_tokens');
     return saved ? parseInt(saved, 10) : 0;
@@ -47,25 +46,6 @@ export const useMiniChat = () => {
       }
     });
   }, []);
-
-  // Timer effect: ticks only when active session exists (messages.length > 0)
-  useEffect(() => {
-    if (messages.length === 0) {
-      setTimer(0);
-      localStorage.removeItem('minichat_timer');
-      return;
-    }
-
-    const timerInterval = setInterval(() => {
-      setTimer(prev => {
-        const next = prev + 1;
-        localStorage.setItem('minichat_timer', next.toString());
-        return next;
-      });
-    }, 1000);
-
-    return () => clearInterval(timerInterval);
-  }, [messages.length]);
 
   // Listen for live settings updates from the main process
   useEffect(() => {
@@ -114,7 +94,7 @@ export const useMiniChat = () => {
 
   // Handle incoming messages and task executions from Electron IPC
   useEffect(() => {
-    // New message from Command Bar
+    // New message from Command Bar or local ChatInput
     const unsubscribeMsg = electronService.onNewChatMessage((msg: string, image?: string) => {
       if (isBusyRef.current) {
         setPendingMessages(prev => [...prev, {
@@ -190,8 +170,6 @@ export const useMiniChat = () => {
     isThinking,
     activeTool,
     isPinned,
-    isResizing,
-    timer,
     tokens,
     isSettingsOpen,
     menuView,
@@ -204,13 +182,18 @@ export const useMiniChat = () => {
     setMenuView,
     togglePin,
     handleMinimize,
-    startResizing,
-    clearHistory: () => {
-      setTimer(0);
+    loadSession: (sessionId: string) => {
+      cancelGeneration();
+      return loadSession(sessionId);
+    },
+    cancelGeneration,
+    clearHistory: (keepOpen: boolean = false) => {
       setTokens(0);
       localStorage.removeItem('minichat_session_tokens');
-      clearHistory();
+      clearHistory(keepOpen);
     },
-    copyToClipboard
+    copyToClipboard,
+    isLoadingSession,
+    currentSessionId
   };
 };

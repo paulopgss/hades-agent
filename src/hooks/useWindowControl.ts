@@ -1,12 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { electronService } from '../services/electron';
 
 /**
  * Hook to manage shared window controls like pinning, resizing, and closing.
+ * 
+ * Resize detection uses the native OS resize via Electron's will-resize/resized
+ * events. The isResizing state is toggled via CSS class on the DOM root directly
+ * to avoid React re-renders during the resize loop.
  */
 export const useWindowControl = (initialPinned = false) => {
   const [isPinned, setIsPinned] = useState(initialPinned);
-  const [isResizing, setIsResizing] = useState(false);
+  const isResizingRef = useRef(false);
 
   // Sync pin state on mount
   useEffect(() => {
@@ -31,47 +35,28 @@ export const useWindowControl = (initialPinned = false) => {
     electronService.closeWindow();
   };
 
-  const startResizing = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizing(true);
-    
-    const startX = e.screenX;
-    const startY = e.screenY;
-    const startWidth = window.innerWidth;
-    const startHeight = window.innerHeight;
-    
-    let lastResize = 0;
-    
-    const onMouseMove = (moveEvent: MouseEvent) => {
-      const now = Date.now();
-      if (now - lastResize < 16) return; // ~60fps throttling
-      lastResize = now;
-      
-      const deltaX = moveEvent.screenX - startX;
-      const deltaY = moveEvent.screenY - startY;
-      
-      // Update window dimensions via Electron IPC
-      electronService.resizeWindow(
-        Math.max(400, startWidth + deltaX), 
-        Math.max(400, startHeight + deltaY)
-      );
-    };
+  // Use IPC to detect when native resizing starts/stops.
+  // Instead of React state (which triggers re-renders), toggle CSS class directly on DOM.
+  useEffect(() => {
+    const unsub = electronService.onWindowResizing((resizing) => {
+      if (isResizingRef.current === resizing) return; // deduplicate
+      isResizingRef.current = resizing;
 
-    const onMouseUp = () => {
-      setIsResizing(false);
-      globalThis.removeEventListener('mousemove', onMouseMove);
-      globalThis.removeEventListener('mouseup', onMouseUp);
-    };
-
-    globalThis.addEventListener('mousemove', onMouseMove);
-    globalThis.addEventListener('mouseup', onMouseUp);
-  };
+      const root = document.querySelector('.app-container');
+      if (root) {
+        if (resizing) {
+          root.classList.add('resizing');
+        } else {
+          root.classList.remove('resizing');
+        }
+      }
+    });
+    return unsub;
+  }, []);
 
   return {
     isPinned,
-    isResizing,
     togglePin,
     handleMinimize,
-    startResizing
   };
 };

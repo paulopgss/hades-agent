@@ -113,10 +113,8 @@ ipcMain.on('send-message', (event, message, image) => {
   log.info('=== [MAIN] ============ SEND-MESSAGE START ============');
   appState.chatHasMessages = true;
   let chatWin = windowManager.get('chat');
-  const cmdWin = windowManager.get('command');
 
   log.info(`[MAIN] chatWin exists=${!!chatWin} destroyed=${chatWin?.isDestroyed?.()}`);
-  log.info(`[MAIN] cmdWin exists=${!!cmdWin} visible=${cmdWin?.isVisible?.()}`);
 
   if (chatWin && !chatWin.isDestroyed()) {
     if (chatWin.isMinimized()) chatWin.restore();
@@ -124,17 +122,9 @@ ipcMain.on('send-message', (event, message, image) => {
     chatWin.setAlwaysOnTop(true, 'pop-up-menu');
     chatWin.show();
     chatWin.moveTop();
+    chatWin.focus();
     log.info(`[MAIN] Chat after show: visible=${chatWin.isVisible()} alwaysOnTop=${chatWin.isAlwaysOnTop()}`);
     chatWin.webContents.send('new-message', message, image);
-
-    // Re-raise command bar on top
-    if (cmdWin?.isVisible()) {
-      log.info('[MAIN] Re-raising command bar on top of chat');
-      cmdWin.setAlwaysOnTop(true, 'pop-up-menu');
-      cmdWin.moveTop();
-      cmdWin.focus();
-      cmdWin.webContents.send('focus-input');
-    }
   } else {
     log.info('[MAIN] Chat window not ready, storing pending message');
     appState.pendingMessage = { message, image };
@@ -159,18 +149,8 @@ ipcMain.on('chat-window-ready', () => {
     chatWin.setAlwaysOnTop(true, 'pop-up-menu');
     chatWin.show();
     chatWin.moveTop();
+    chatWin.focus();
     log.info(`[MAIN] Chat after show: visible=${chatWin.isVisible()} alwaysOnTop=${chatWin.isAlwaysOnTop()}`);
-  }
-
-  // Re-raise command bar on top
-  const cmdWin = windowManager.get('command');
-  if (cmdWin?.isVisible()) {
-    log.info('[MAIN] Re-raising command bar on top of chat');
-    cmdWin.setAlwaysOnTop(true, 'pop-up-menu');
-    cmdWin.show();
-    cmdWin.moveTop();
-    cmdWin.focus();
-    cmdWin.webContents.send('focus-input');
   }
   console.log('=== [MAIN] ============ CHAT-WINDOW-READY END ==============');
   console.log('');

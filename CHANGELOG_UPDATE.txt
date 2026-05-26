@@ -1,0 +1,25 @@
+# 🚀 Hades Agent - Atualização de Arquitetura e Performance
+
+## ✨ Novidades e Melhorias
+
+### 🏗️ Arquitetura Unificada e Simplificada
+- **Ponto de Entrada Centralizado & UI/UX:** Removemos a CommandBar e unificamos o gravador e o chat (e suas funcionalidades) em uma única janela (`App.tsx`), melhorando significativamente a UI e UX do sistema.
+- **Alternância de Modos:** O aplicativo agora alterna de maneira fluida e instantânea entre o **MiniChat** e o **Susurro** usando uma única estrutura de estado.
+
+### 💾 Persistência de Sessão Aprimorada
+- **Handlers Backend (IPC):** Implementação robusta no `ipcMain` para carregar, salvar e arquivar transcrições do Chat e Susurro.
+- **Histórico Consistente:** As sessões agora persistem através do arquivo `sessions.json`.
+- **Títulos Inteligentes:** Geração automática de títulos para o histórico através do `aiService`.
+
+### ⚡ Gerenciamento de Janelas e Alta Performance
+- **Redimensionamento Ultra Rápido:** Transição para o novo padrão IPC `"resize-window-fast"` (fire-and-forget), ignorando as chamadas síncronas (`handle`) pesadas.
+- **Loop de Renderização (rAF):** Implementação de um loop nativo de `requestAnimationFrame` no cliente para eliminar lags e engasgos visuais durante o redimensionamento.
+- **Modo Susurro Compacto:** Introduzido um novo modo de visualização estilo "overlay compacto" para o Susurro, contando com controles dinâmicos por hover.
+
+### 🎨 Refinamentos UI/UX e Consistência
+- **Cabeçalhos Padronizados:** Consolidamos a lógica de navegação lateral (menu hamburguer) e troca de modos entre `ChatHeader` e `SusurroHeader`.
+- **Correção de Sobreposições e Z-Index:** O overlay do menu lateral e as configurações agora cobrem a janela uniformemente (`position: fixed` e z-index padronizados), resolvendo falhas onde ícones de configuração sumiam, não desfocavam corretamente ou eram cortados.
+- **Ajustes de Tema:** Transição para CSS variables de tamanho de fonte, evitando transições pesadas de layout do CSS.
+
+### 🧠 Integração Aprimorada com o Gemini Live
+- **Modo de Sugestões (`isSuggestionsMode`):** Novo modo no `GeminiLiveService`, permitindo que a IA forneça insights contextuais e sugestões em tempo real, indo além de simples transcrições, com suporte total a logging (debugging) dos payloads.

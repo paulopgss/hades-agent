@@ -110,6 +110,29 @@ class WindowManager {
       log.info(`[WINDOW_MANAGER] DevTools closed for: ${name}`);
     });
 
+    let resizeTimeout = null;
+    let isCurrentlyResizing = false;
+
+    win.on('will-resize', () => {
+      // Only send 'true' once per resize operation
+      if (!isCurrentlyResizing) {
+        isCurrentlyResizing = true;
+        win.webContents.send('window-resizing', true);
+      }
+      // Reset the "done" timer on each move
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        isCurrentlyResizing = false;
+        if (!win.isDestroyed()) win.webContents.send('window-resizing', false);
+      }, 150);
+    });
+
+    win.on('resized', () => {
+      if (resizeTimeout) clearTimeout(resizeTimeout);
+      isCurrentlyResizing = false;
+      win.webContents.send('window-resizing', false);
+    });
+
     // Cleanup on close
     win.on('closed', () => {
       log.info(`[WINDOW_MANAGER] Window closed: ${name}`);
@@ -211,7 +234,7 @@ class WindowManager {
     });
 
     win.on('close', (event) => {
-      if (!app.isQuitting) {
+      if (!require('../appState').isQuitting) {
         event.preventDefault();
         win.hide();
       }
@@ -238,21 +261,21 @@ class WindowManager {
           log.info('[WINDOW_MANAGER] >>> Chat BLUR → file dialog open, keeping visible');
           return;
         }
+
+        if (win.webContents.isDevToolsOpened()) {
+          log.info('[WINDOW_MANAGER] DevTools are open, keeping chat window visible.');
+          return;
+        }
         
         const focusedWin = BrowserWindow.getFocusedWindow();
-        const cmdWin = this.get('command');
-        const isCommandFocused = focusedWin && focusedWin === cmdWin;
         
-        log.info(`[WINDOW_MANAGER] Chat BLUR check: isCommandFocused=${isCommandFocused} isChatPinned=${appState.isChatPinned} focusedWin=${focusedWin ? 'APP_WINDOW' : 'NONE/EXTERNAL'} chatVisible=${win.isVisible()}`);
+        log.info(`[WINDOW_MANAGER] Chat BLUR check: isChatPinned=${appState.isChatPinned} focusedWin=${focusedWin ? 'APP_WINDOW' : 'NONE/EXTERNAL'} chatVisible=${win.isVisible()}`);
         
-        if (!appState.isChatPinned && !isCommandFocused && focusedWin !== win) {
-          log.info('[WINDOW_MANAGER] >>> Chat BLUR → HIDING chat + command');
+        if (!appState.isChatPinned && focusedWin !== win) {
+          log.info('[WINDOW_MANAGER] >>> Chat BLUR → HIDING chat');
           win.hide();
-          if (cmdWin && !cmdWin.isDestroyed()) {
-            cmdWin.hide();
-          }
         } else {
-          log.info('[WINDOW_MANAGER] >>> Chat BLUR → keeping visible (pinned or command focused)');
+          log.info('[WINDOW_MANAGER] >>> Chat BLUR → keeping visible (pinned)');
         }
       }, 150);
     });
@@ -274,7 +297,7 @@ class WindowManager {
   createVoiceWindow() {
     const win = this.createWindow('voice');
     win.on('close', (event) => {
-      if (!app.isQuitting) {
+      if (!require('../appState').isQuitting) {
         event.preventDefault();
         win.blur();
         win.hide();
@@ -332,8 +355,7 @@ class WindowManager {
     });
 
     win.on('close', (event) => {
-      const { app } = require('electron');
-      if (!app.isQuitting) {
+      if (!require('../appState').isQuitting) {
         event.preventDefault();
         win.hide();
       }
@@ -355,7 +377,7 @@ class WindowManager {
     win.once('ready-to-show', () => win.show());
     // Settings window should not close on blur
     win.on('close', (event) => {
-      if (!app.isQuitting) {
+      if (!require('../appState').isQuitting) {
         event.preventDefault();
         win.hide();
       }

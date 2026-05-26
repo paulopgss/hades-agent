@@ -1,8 +1,8 @@
 /* Mini Chat Styles */
 
 .chat-header {
-  height: 60px;
-  min-height: 60px;
+  height: 44px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -138,7 +138,7 @@
 .chat-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   flex-shrink: 0; /* never let buttons get clipped at small window sizes */
   -webkit-app-region: no-drag;
 }
@@ -182,21 +182,7 @@
   color: #ef4444;
 }
 
-/* Performance: disable heavy effects during window resize */
-.app-container.resizing {
-  pointer-events: none;
-}
-
-.app-container.resizing .chat-content,
-.app-container.resizing .chat-input {
-  backdrop-filter: none !important;
-  background: rgba(20, 20, 25, 0.95) !important;
-}
-
-.app-container.resizing * {
-  transition: none !important;
-  animation: none !important;
-}
+/* Performance: resizing optimizations are in layout.css */
 
 .chat-content {
   flex: 1;
@@ -222,7 +208,7 @@
   max-width: 85%;
   padding: 8px 14px;
   border-radius: 16px;
-  font-size: 14px;
+  font-size: var(--chat-base-font-size, 14px);
   line-height: 1.5;
   margin-bottom: 12px;
   position: relative;

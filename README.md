@@ -1,189 +1,224 @@
-<p align="center">
-  <img src="https://res.cloudinary.com/dmii83n8i/image/upload/fl_preserve_transparency/v1779237561/hades-agent_cx7vq7.jpg?_s=public-apps" alt="Hades Banner" width="100%" style="border-radius: 16px; max-width: 800px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
-</p>
+# Hades Agent
 
-<table>
-  <tr>
-    <td width="35%" align="center" valign="top">
-      <img src="public/icon/icon.png" width="280" style="border-radius: 40px; border: 5px solid #ff2a2a; box-shadow: 0 15px 40px rgba(255, 42, 42, 0.4); display: block; margin-bottom: 15px;" alt="Hades Agent Logo" />
-      <p align="center" style="margin-top: 10px; margin-bottom: 0;">
-        <img src="https://img.shields.io/badge/License-MIT-red?style=flat-square&color=150202" alt="License" style="display: inline-block; vertical-align: middle;" />
-        <img src="https://img.shields.io/badge/Electron-42.0-red?style=flat-square&logo=electron&logoColor=white&color=150202" alt="Electron" style="display: inline-block; vertical-align: middle;" />
-        <img src="https://img.shields.io/badge/React-19.0-red?style=flat-square&logo=react&logoColor=61DAFB&color=150202" alt="React" style="display: inline-block; vertical-align: middle;" />
-      </p>
-    </td>
-    <td width="65%" valign="top" style="padding-left: 20px;">
-      <h1 style="margin-top: 0; margin-bottom: 8px;">Hades Agent <img src="https://res.cloudinary.com/dmii83n8i/image/upload/v1779302517/hades-tray-icon-128_dks55n.png" width="36" height="36" align="center" style="display: inline-block; vertical-align: middle; margin-left: 6px;" alt="Hades Icon" /></h1>
-      <p><strong>Hades is an invisible, ultra-fast desktop companion with autonomous background memory consolidation and a local task scheduler.</strong></p>
-      <p><strong>Safety Limits:</strong> Sandboxed with <strong>zero system-write access</strong> (cannot create, edit, or delete files, nor run scripts). The AI is strictly restricted to real-time Google queries (via Tavily) and local memory logs, keeping your PC 100% safe.</p>
-    </td>
-  </tr>
-</table>
+O Hades Agent é um assistente virtual inteligente para desktop (Windows), construído com Electron e React. Ele funciona como um "floating widget" que oferece chat de texto avançado e um poderoso modo de transcrição por voz com insights em tempo real via Gemini Live.
 
-<p align="center" style="margin-top: 20px;">
-  <a href="https://github.com/victorl-dev/Hades-Agent/releases"><img src="https://img.shields.io/badge/Releases-Download-FF2A2A?style=for-the-badge&logo=github" alt="Releases"></a>
-  <a href="https://github.com/victorl-dev/Hades-Agent/blob/master/LICENSE"><img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License: MIT"></a>
-  <a href="https://github.com/victorl-dev/Hades-Agent"><img src="https://img.shields.io/badge/Built%20With-Gemini%20Live%20API-blueviolet?style=for-the-badge" alt="Built with Gemini Live"></a>
-  <a href="https://github.com/victorl-dev/Hades-Agent"><img src="https://img.shields.io/badge/Platform-Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white" alt="Platform: Windows"></a>
-</p>
+## Key Features
 
-<table>
-<tr>
-  <td><b>🛡️ Anti-Recording Shield</b></td>
-  <td>Native OS-level content protection via <code>setContentProtection</code>. Hades becomes <strong>completely invisible</strong> to OBS Studio, Discord, Teams, Zoom, and all Windows screen-capture APIs — your private data never leaks through shared screens.</td>
-</tr>
-<tr>
-  <td><b>🎙️ Real-time Transcription (Alt+B)</b></td>
-  <td>Press <code>Alt+B</code> to capture and transcribe PC internal audio (like meetings or video classes) in real-time. Streams raw <strong>16 kHz PCM audio</strong> over a full-duplex WebSocket directly to the <strong>Gemini Live API</strong>, achieving sub-100ms transcription latency.</td>
-</tr>
-<tr>
-  <td><b>⚡ Spotlight Command Bar</b></td>
-  <td>Press <code>Alt+D</code> to summon a floating, borderless command bar. Delivers <strong>real-time internet-grounded answers</strong> powered by the Tavily Search API — attach images, switch AI models, and get answers without ever leaving your workflow.</td>
-</tr>
-<tr>
-  <td><b>💬 Session MiniChat</b></td>
-  <td>A persistent chat HUD that displays the <strong>active model, live token count, and session cost</strong>. Wipe the session instantly to reset all timers, history, and spend back to zero — no restart required.</td>
-</tr>
-<tr>
-  <td><b>🧠 Dream Memory Consolidation</b></td>
-  <td>Scheduled background AI cycles synthesize recent session logs into a <strong>compressed <code>learnings.json</code> memory profile</strong> — similar to how the brain consolidates long-term memory during sleep. Runs fully offline.</td>
-</tr>
-<tr>
-  <td><b>📋 Safe Task Scheduler</b></td>
-  <td>A strictly sandboxed, <strong>offline task ledger</strong> with zero system-write permissions. Safely schedule automated web searches, create daily reminders, and organize MiniChat responses without risking modifications to your local files. Managed through encrypted IPC database handlers.</td>
-</tr>
-</table>
+- **MiniChat:** Um chat flutuante minimalista, conversando diretamente com a IA, projetado para acesso rápido e atalhos globais.
+- **Modo Susurro (Insights em Tempo Real):** Muito mais que um simples gravador de voz. Ao ativar o modo "Sugestões/Insights", o Hades deixa de atuar apenas como um transcritor e passa a ouvir ativamente o seu contexto. Ele funciona como um *parceiro de brainstorming*, identificando perguntas, problemas ou tópicos de discussão em tempo real e fornecendo ideias, respostas rápidas e soluções diretamente na tela. O modelo foi estritamente instruído (via `insight_rules.md`) a ser conciso, ágil e a ocultar monólogos internos (CoT), entregando apenas o valor final diretamente para você ler enquanto fala.
+- **Histórico Persistente:** O aplicativo salva automaticamente suas sessões de texto e áudio no backend, gerando títulos inteligentes baseados no contexto da conversa.
+- **Overlay & Glassmorphism UI:** Design premium com transparências fluidas, menus laterais e alta responsividade.
+- **Redimensionamento Nativo:** Loop de redimensionamento de janela otimizado em nível de sistema (`requestAnimationFrame` + IPC fast-fire) para desempenho imaculado em Windows.
 
 ---
 
-## <img src="https://api.iconify.design/lucide:download.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> Getting Started
+## Tech Stack
 
-### For Users (Download Installer)
+- **Linguagem:** TypeScript / JavaScript (Node.js + Browser)
+- **Framework Desktop:** Electron (v42+)
+- **Frontend:** React 19 + Vite 8
+- **Estilização:** CSS Vanilla puro com CSS Variables & Backdrop Filters
+- **IA e APIs:** `@google/genai`, `@google/generative-ai`, `@google-cloud/speech`
+- **Áudio:** `recordrtc`
+- **Empacotador:** `electron-builder`
 
-1. Head to the **[Releases](https://github.com/victorl-dev/Hades-Agent/releases)** page.
-2. Download **`Hades-Agent-Setup-1.0.0.exe`** (or the `.zip` portable version).
-3. Run the installer, launch Hades, then press **`Alt+S`** to enter your API keys.
+---
 
-> [!WARNING]
-> **Platform:** Hades has been tested exclusively on **Windows 10**. Windows 11 may work but is untested. macOS and Linux are **not supported** — the Anti-Recording Shield (`setContentProtection`) and global hotkey registration rely on Windows-specific Electron APIs.
+## Prerequisites
 
-> [!IMPORTANT]
-> Hades requires two free API keys to operate:
-> - **[Google Gemini API Key](https://aistudio.google.com/app/apikey)** — for all AI inference and voice streaming.
-> - **[Tavily Search API Key](https://app.tavily.com/)** — for real-time web search grounding.
+- Node.js 20 ou superior.
+- NPM ou pnpm.
+- Uma chave de API válida do **Google Gemini API**.
+- SO: Windows (o empacotamento é focado em `.exe` e portable apps no Windows).
 
-### For Developers (Build from Source)
+---
 
-**Prerequisites**
+## Getting Started
 
-| Requirement | Version | Notes |
-| :--- | :--- | :--- |
-| [Node.js](https://nodejs.org/) | v18.x or newer | LTS recommended |
-| npm | bundled with Node.js | — |
-| Windows | 10 / 11 | `setContentProtection` is Windows-only |
+### 1. Clonar o Repositório
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/victorl-dev/Hades-Agent.git
-cd Hades-Agent
+git clone https://github.com/seuperfil/hades-agent.git
+cd hades-agent
+```
 
-# 2. Install all dependencies
+### 2. Instalar as Dependências
+
+```bash
 npm install
+```
 
-# 3. Launch the concurrent hot-reload dev environment
+### 3. Configurar Variáveis de Ambiente
+
+Crie um arquivo `.env` na raiz do projeto (mesmo nível do `package.json`).
+
+```bash
+# Exemplo do arquivo .env
+GEMINI_API_KEY=sua_chave_de_api_aqui
+```
+
+### 4. Executar em Ambiente de Desenvolvimento
+
+O comando abaixo iniciará paralelamente o Vite (para compilar o React) e o Electron (sua janela nativa).
+
+```bash
 npm run dev
 ```
 
-The dev server starts Vite (React renderer on `:3000`) and Electron concurrently with full hot-reload on both sides.
+*Nota: Em caso de travamentos residuais, o comando automaticamente mata portas 3000 presas e finaliza processos zumbis do Electron.*
 
 ---
 
-## <img src="https://api.iconify.design/lucide:keyboard.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> Keyboard Shortcuts
+## Architecture
 
-Hades lives silently in your system tray and can be summoned from any application, at any time:
+O Hades Agent utiliza uma arquitetura unificada de Janela Única. O estado principal de aplicação alterna as interfaces internas, mantendo a janela do Electron viva e redimensionando de acordo.
 
-| Shortcut | Action |
-| :--- | :--- |
-| **`Alt+D`** | Summon / dismiss the Spotlight Command Bar |
-| **`Alt+B`** | Summon / dismiss the Real-time Transcription HUD |
-| **`Alt+S`** | Open Settings & Shortcut Customization |
-| **`Alt+V`** | Toggle voice input mode |
-| **`Esc`** | Hide the active window and restore prior focus |
+### Directory Structure
 
-> [!TIP]
-> Every shortcut is fully rebindable. Open the **Shortcuts** tab inside Settings (`Alt+S`) to assign your own key combinations.
-
----
-
-## <img src="https://api.iconify.design/lucide:network.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> System Architecture
-
-Hades orchestrates multiple transparent overlay windows through a strict **IPC event bridge**, keeping the renderer completely sandboxed from the filesystem while the main process handles all privileged operations:
-
-```mermaid
-graph TD
-    classDef main fill:#1a0505,stroke:#ff2a2a,stroke-width:2px,color:#fff;
-    classDef float fill:#0a0303,stroke:#dc2626,stroke-width:1px,color:#fff;
-    classDef service fill:#111,stroke:#888,stroke-width:1px,color:#aaa;
-    classDef external fill:#2b0c0c,stroke:#f97316,stroke-width:1px,color:#ffed4a;
-
-    Main[Electron Main Process]:::main
-    
-    subgraph UI_Layers [Transparent Overlay Windows]
-        CommandBar[Alt+D: Spotlight Command]:::float
-        MiniChat[MiniChat Dynamic Window]:::float
-        Susurro[Alt+B: Real-time Transcription HUD]:::float
-        Notification[Alerts & Notifications]:::float
-        Settings[Alt+S: Settings & Shortcuts]:::float
-    end
-    
-    SSoT[IPC Bridge Protocol]:::service
-    Store[AES-256 Secure JsonStore]:::service
-    Dream[DreamService AI Sleep]:::service
-    
-    subgraph Cloud_APIs [Cloud Intelligence Services]
-        Gemini[Gemini Live API]:::external
-        Tavily[Tavily Search API]:::external
-    end
-
-    Main -->|Manages Window States| UI_Layers
-    UI_Layers -->|IPC Signals & Actions| SSoT
-    SSoT -->|Electron Event Handlers| Main
-    Main -->|Reads/Writes AES-256 Secrets| Store
-    Main -->|Schedules AI Consolidation| Dream
-    Dream -->|Persists Insights| Store
-    
-    Main <-->|16kHz Raw PCM Audio Stream| Gemini
-    Main <-->|Asynchronous Web Queries| Tavily
+```
+├── electron/                 # Funcionalidades do Processo Main (Electron)
+│   ├── main.js               # Ponto de entrada do Electron
+│   ├── windowManager.js      # Criação da janela, bounds e drag
+│   ├── ipcHandlers.js        # Handlers IPC para gerenciar estado, arquivos e eventos
+│   └── services/             # Serviços do Backend
+│       ├── aiService.js      # Integração base do Gemini
+│       └── geminiLiveService.js # WebSocket para o Gemini Live (streaming)
+├── public/                   # Arquivos estáticos e ícones
+├── src/                      # Código Fonte Frontend (React)
+│   ├── App.tsx               # Controlador principal e roteador (MiniChat ↔ Susurro)
+│   ├── components/           # Componentes UI
+│   │   ├── chat/             # UI do MiniChat (Header, Body, Input)
+│   │   ├── susurro/          # UI do gravador e insights (SusurroHeader, Overlay)
+│   │   └── common/           # Menus, ícones e overlays compartilhados
+│   ├── hooks/                # Custom React Hooks
+│   ├── styles/               # CSS global e específico por componente
+│   ├── types/                # Definições TypeScript
+│   └── main.tsx              # Ponto de inicialização do React
+├── prompts/                  # Instruções de contexto para os agentes IA
+├── package.json              # Configurações do npm e Electron Builder
+└── vite.config.ts            # Configurações de build do Vite
 ```
 
+### Data Flow & IPC
+
+O Hades comunica sua interface gráfica (React) com as APIs e manipulação de arquivos (Node.js) através do `contextBridge` definido no `preload.js`. 
+
+```
+Ação do Usuário (React) 
+  → window.electronAPI (Preload) 
+    → ipcMain.on / handle (Node.js / Electron) 
+      → aiService.js ou sessions.json
+        → window.webContents.send (Resposta pro React)
+```
+
+### Key Components
+
+**Sistema de Sessões (`sessions.json`)**
+- As transcrições e conversas são salvas em formato de sessão. O aplicativo solicita que a IA gere um título curto e salva permanentemente no HD.
+
+**Redimensionamento em Tempo Real (`windowManager.js`)**
+- Usamos o padrão IPC `resize-window-fast` ao invés de canais IPC com promessas. O cliente dispara via `requestAnimationFrame` eventos rápidos de mouse, permitindo que a janela Electron seja arrastada e expandida a 60fps sem delay de Main-Thread.
+
+**Gemini Live Integrado**
+- Em modo Susurro, ativamos `isSuggestionsMode` no streaming WebSocket do Gemini. Isso instrui o modelo de IA a retornar insights instantâneos filtrando seus próprios "Internal Monologues" para não poluir a visualização final do usuário.
+
 ---
 
-## <img src="https://api.iconify.design/lucide:cpu.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> AI-Assisted Engineering
+## Available Scripts
 
-Hades was co-engineered with **[Google Antigravity](https://deepmind.google/)** (Advanced Agentic Coding Assistant by Google DeepMind) using **Subagent-Driven Development (SDD)**:
-
-- **Modular Autonomy:** Specialized subagents independently built IPC event engines, AES-256 cryptography wrappers, voice PCM pipelines, and window lifecycle managers — each validated in isolation before integration.
-- **Strict Quality Gates:** Architecture enforces minimal custom React hook sizes, a single centralized state store (`jsonStore.js`), and production Vite compilation times consistently under **760 ms**.
-- **Continuous Hardening:** Security subagents enforced sandbox isolation, Content Security Policy headers, and `contextIsolation` at every IPC boundary, with no `nodeIntegration` exposure to the renderer.
-
----
-
-## <img src="https://api.iconify.design/lucide:sparkles.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> Inspiration & Credits
-
-> [!NOTE]
-> Hades Agent is inspired by **Persua**, a conceptual real-time voice and AI assistant created by software engineer **Lucas Montano** ([@lucasmontano](https://github.com/lucasmontano)). Hades was engineered entirely from scratch to explore raw PCM streaming, full-duplex WebSockets, and OS-level content-protection algorithms in Electron. Thank you, Lucas, for pushing the community to build things that don't exist yet.
+| Command | Description |
+|---|---|
+| `npm run dev` | Inicia servidor de desenvolvimento (React + Electron) com Auto-Reload. |
+| `npm run build` | Faz o build de produção apenas da camada React. |
+| `npm run package` | Constrói o executável do Electron para Windows (`.exe`). |
+| `npm run dist` | Faz o build do React e logo em seguida empacota em formato instalável (`nsis`) e portátil (`portable`). |
+| `npm run test` | Roda testes com o Vitest. |
 
 ---
 
-## <img src="https://api.iconify.design/lucide:star.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> Star History
+## Deployment & Packaging
 
-[![Star History Chart](https://api.star-history.com/svg?repos=victorl-dev/Hades-Agent&type=Date)](https://star-history.com/#victorl-dev/Hades-Agent&Date)
+Para distribuir a aplicação, utilize o `electron-builder` que já está devidamente configurado no `package.json`.
+
+### Gerando Instaladores (Windows)
+
+```bash
+npm run dist
+```
+
+Isso criará uma pasta `release/` na raiz do seu projeto contendo:
+- `Hades-Agent-Setup-1.0.0.exe` (Instalador tradicional)
+- `Hades-Agent-1.0.0-portable.exe` (Standalone app)
+- Arquivos `.zip` e descompactados opcionais.
 
 ---
 
-## <img src="https://api.iconify.design/lucide:file-text.svg?color=%23ff2a2a" width="22" height="22" align="center" style="vertical-align: middle; margin-right: 8px;" /> License
+## Troubleshooting
 
-MIT — See [LICENSE](LICENSE).
+### Erros de Porta Presa (Port 3000)
+**Problema:** O Vite informa que a porta 3000 já está em uso.
+**Solução:** O script `npm run dev` tenta matar a porta via `kill-port`. Caso persista, execute no terminal do Windows: 
+`npx kill-port 3000`
 
-Built with dedication by [Victor L.](https://github.com/victorl-dev)
+### A Janela Trava ao Redimensionar
+**Solução:** Certifique-se de que não haja nenhum componente CSS fazendo `transition: all` no `.app-container`. Transições de layout CSS atreladas com o ResizeObserver do Electron travam a Main Thread do SO.
 
+### Gemini API Retornando Erro
+**Solução:** Verifique se o seu `.env` foi carregado corretamente. Como o arquivo fica na raiz do Electron, o `dotenv` inicializado no `main.js` fará a leitura. 
+
+---
+
+## Environment Variables
+
+O sistema requer algumas chaves para funcionar perfeitamente.
+
+### Variáveis Obrigatórias
+
+Crie um arquivo `.env` na raiz do projeto (mesmo nível de `package.json`).
+
+| Variable         | Description                                     | Example                                  |
+| ---------------- | ----------------------------------------------- | ---------------------------------------- |
+| `GEMINI_API_KEY` | Chave de API do Google Gemini para a IA e o chat| `AIzaSyB...`                             |
+
+### Acesso via Electron
+
+O arquivo `.env` é lido nativamente pelo pacote `dotenv` no `main.js` do Electron e repassado aos serviços backend (`aiService.js`, `geminiLiveService.js`). Não tente importar diretamente no React (`Vite`), deixe o Backend gerenciar o token.
+
+---
+
+## Testing
+
+O ambiente está configurado para usar o **Vitest** devido à integração nativa com o Vite.
+
+### Executando Testes
+
+```bash
+# Rodar todos os testes no modo watch
+npm run test
+
+# Para rodar uma vez na integração contínua (CI)
+npx vitest run
+```
+
+*Nota: Os testes ainda podem ser expandidos para cobrir as integrações de IPC (Inter-Process Communication) utilizando mocks para os módulos nativos do Electron.*
+
+---
+
+## Contributing
+
+Se quiser contribuir com o projeto:
+1. Faça um Fork do repositório.
+2. Crie uma branch para a sua feature (`git checkout -b feature/minha-feature`).
+3. Comite suas mudanças (`git commit -m 'feat: adiciona minha feature'`).
+4. Faça o push para a branch (`git push origin feature/minha-feature`).
+5. Abra um Pull Request.
+
+---
+
+## License
+
+Este projeto está licenciado sob a **MIT License**.
+
+A licença MIT é uma licença open-source permissiva, simples e clara. Ela permite livremente a utilização, cópia, modificação, mesclagem, publicação, distribuição, sublicenciamento e/ou venda de cópias deste software, desde que o aviso de copyright e o aviso de permissão sejam incluídos em todas as cópias ou partes substanciais do Software.
+
+Copyright (c) 2026, Victor L. Oliveira

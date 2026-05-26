@@ -137,14 +137,14 @@ function registerWindowHandlers() {
   });
 
   /**
-   * Enables manual resizing for frameless windows.
+   * Fast fire-and-forget resize for manual drag handles.
+   * Uses ipcMain.on (not handle) to avoid await overhead on every mousemove.
    */
-  ipcMain.on('start-resizing', (event) => {
+  ipcMain.on('resize-window-fast', (event, { width, height }) => {
     const win = BrowserWindow.fromWebContents(event.sender);
-    // On Windows, we can use win.setResizable(true) if it was false, 
-    // but usually we just want to trigger the system resize if possible.
-    // For now, just ensuring it's resizable.
-    if (win) win.setResizable(true);
+    if (win && !win.isDestroyed()) {
+      win.setSize(Math.round(width), Math.round(height), false);
+    }
   });
 
   /**
@@ -174,6 +174,17 @@ function registerWindowHandlers() {
     chatWin.moveTop();
     chatWin.show();
     chatWin.focus();
+  });
+
+  /**
+   * Shows the susurro window.
+   */
+  ipcMain.on('show-susurro', () => {
+    const susurroWin = windowManager.get('susurro') || windowManager.createSusurroWindow();
+    susurroWin.setAlwaysOnTop(true, 'pop-up-menu');
+    susurroWin.moveTop();
+    susurroWin.show();
+    susurroWin.focus();
   });
 
   /**

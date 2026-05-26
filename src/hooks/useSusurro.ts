@@ -11,7 +11,7 @@ import { electronService } from '../services/electron';
  * Orchestrator hook for Susurro logic.
  * Manages state for messages, personas, translation, and UI controls.
  */
-export const useSusurro = () => {
+export const useSusurro = (isActive: boolean = true) => {
   // --- Core State ---
   const [messages, setMessages] = useState<SusurroMessage[]>([]);
   const [timer, setTimer] = useState(0);
@@ -28,13 +28,24 @@ export const useSusurro = () => {
   const [isGlobalTranslationEnabled, setIsGlobalTranslationEnabled] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
   const [fontSize, setFontSize] = useState(14); // Default 14px
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
+    return localStorage.getItem('current_susurro_session_id');
+  });
+  const [isLoaded, setIsLoaded] = useState(false);
 
   // --- Refs ---
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const isActiveRef = useRef(isActive);
+
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
 
   // --- Sub-Hooks ---
-  const { isPinned, isResizing, togglePin, handleMinimize, startResizing } = useWindowControl();
+  const { isPinned, togglePin, handleMinimize } = useWindowControl();
   const { copiedId, copyToClipboard } = useClipboard();
+  const [isClosingSession, setIsClosingSession] = useState(false);
+  
   const {
     personas,
     selectedPersona,
@@ -62,6 +73,23 @@ export const useSusurro = () => {
     };
     loadTokens();
 
+    const initSession = async () => {
+      try {
+        const storedId = localStorage.getItem('current_susurro_session_id');
+        if (storedId) {
+          const activeHistory = await electronService.getSusurroHistory();
+          if (activeHistory && activeHistory.length > 0) {
+            setMessages(activeHistory);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load session:', err);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+    initSession();
+
     electronService.getSettings().then(settings => {
       if (settings?.audio?.micVolume !== undefined) {
         setInputVolume(settings.audio.micVolume / 100);
@@ -70,6 +98,8 @@ export const useSusurro = () => {
 
     const timerInterval = setInterval(() => setTimer(prev => prev + 1), 1000);
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isActiveRef.current) return;
+      
       if (e.key === 'Escape') {
         electronService.closeWindow();
       }
@@ -104,7 +134,12 @@ export const useSusurro = () => {
     if (autoScroll) {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, autoScroll]);
+    // Save messages whenever they change, so end-session has access to the current history
+    // Only save if loaded to prevent overwriting with initial empty array
+    if (isLoaded) {
+      electronService.saveSusurroHistory(messages);
+    }
+  }, [messages, autoScroll, isLoaded]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--susurro-base-font-size', `${fontSize}px`);
@@ -140,12 +175,16 @@ export const useSusurro = () => {
 
   const handleCloseSession = useCallback(async () => {
     try {
+      setIsClosingSession(true);
       await electronService.endSession('susurro');
     } catch {
       // Archiving failed, still clear local state
     } finally {
       setMessages([]);
       setTimer(0);
+      setCurrentSessionId(null);
+      localStorage.removeItem('current_susurro_session_id');
+      setIsClosingSession(false);
     }
   }, []);
 
@@ -169,7 +208,7 @@ export const useSusurro = () => {
     autoScroll, setAutoScroll,
 
     // Window/UI
-    isPinned, isResizing, togglePin, handleMinimize, startResizing,
+    isPinned, togglePin, handleMinimize,
     copiedId, copyToClipboard,
     chatEndRef,
     handleScroll,
@@ -187,6 +226,9 @@ export const useSusurro = () => {
     fontSize,
     increaseFontSize: () => setFontSize(prev => Math.min(prev + 1, 24)),
     decreaseFontSize: () => setFontSize(prev => Math.max(prev - 1, 10)),
-    onCloseSession: handleCloseSession
+    onCloseSession: handleCloseSession,
+    currentSessionId,
+    setCurrentSessionId,
+    isClosingSession
   };
 };

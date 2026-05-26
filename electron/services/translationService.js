@@ -9,7 +9,7 @@ class TranslationService {
   liveCache = new Map();
 
   // LibreTranslate configuration
-  libreUrl = 'http://192.168.0.101:5000/translate';
+  libreUrl = 'https://tradutor.hades-research.com/translate';
 
   /**
    * Translates text using a remote LibreTranslate instance.
@@ -26,6 +26,7 @@ class TranslationService {
         method: 'POST',
         body: JSON.stringify({
           q: text,
+          source: 'auto',
           target: targetLang,
           format: 'text'
         }),

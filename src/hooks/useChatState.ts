@@ -13,6 +13,9 @@ export const useChatState = () => {
   const [pendingMessages, setPendingMessages] = useState<ChatMessage[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(() => {
+    return localStorage.getItem('current_session_id');
+  });
 
   const messagesRef = useRef<ChatMessage[]>(messages);
   const pendingMessagesRef = useRef<ChatMessage[]>(pendingMessages);
@@ -30,11 +33,16 @@ export const useChatState = () => {
     // Single Source of Truth for persistence: The messages state
     const historyJson = JSON.stringify(messages);
     localStorage.setItem('chat_history', historyJson);
+    if (currentSessionId) {
+      localStorage.setItem('current_session_id', currentSessionId);
+    } else {
+      localStorage.removeItem('current_session_id');
+    }
     
     // Update Electron side
     electronService.saveChat(messages);
     electronService.updateChatStatus(messages.length > 0);
-  }, [messages, isLoaded]);
+  }, [messages, isLoaded, currentSessionId]);
 
   // Initial load from Electron storage (fallback to localStorage if empty)
   useEffect(() => {
@@ -86,17 +94,47 @@ export const useChatState = () => {
    * then clears all local state. This is the canonical way to start a new session.
    * Local state is always cleared even if archiving fails (e.g. API quota errors).
    */
-  const clearHistory = useCallback(() => {
+  const clearHistory = useCallback((keepOpen: boolean = false) => {
     // Clear local state immediately for better UI experience
     setMessages([]);
     messagesRef.current = [];
     localStorage.removeItem('chat_history');
     localStorage.removeItem('minichat_timer');
+    localStorage.removeItem('current_session_id');
+    setCurrentSessionId(null);
 
     // Archive in the background
-    electronService.endSession('minichat').catch((err) => {
+    electronService.endSession('minichat', keepOpen).catch((err) => {
       console.error('[useChatState] Failed to end session:', err);
     });
+  }, []);
+
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
+
+  /**
+   * Loads a specific session by ID and makes it the active chat.
+   */
+  const loadSession = useCallback(async (sessionId: string) => {
+    setIsLoadingSession(true);
+    // First, end the current session if it has messages so we don't lose it
+    if (messagesRef.current.length > 0) {
+      await electronService.endSession('minichat', true).catch(err => console.error(err));
+    }
+
+    try {
+      const history = await electronService.loadSession(sessionId);
+      if (history) {
+        setMessages(history);
+        messagesRef.current = history;
+        setCurrentSessionId(sessionId);
+        localStorage.setItem('chat_history', JSON.stringify(history));
+        localStorage.setItem('current_session_id', sessionId);
+      }
+    } catch (err) {
+      console.error('[useChatState] Failed to load session:', err);
+    } finally {
+      setIsLoadingSession(false);
+    }
   }, []);
 
   return {
@@ -109,6 +147,10 @@ export const useChatState = () => {
     isBusy,
     setIsBusy,
     addMessage,
-    clearHistory
+    clearHistory,
+    loadSession,
+    isLoadingSession,
+    currentSessionId,
+    setCurrentSessionId
   };
 };

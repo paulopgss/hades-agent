@@ -3,6 +3,7 @@ import { ChevronLeft, Check } from 'lucide-react';
 import { MODELS } from '../../constants';
 
 interface SettingsMenuProps {
+  isOpen: boolean;
   view: 'main' | 'models';
   currentModel: string;
   onSetView: (view: 'main' | 'models') => void;
@@ -14,6 +15,7 @@ interface SettingsMenuProps {
  * Settings menu for model selection and other configurations.
  */
 export const SettingsMenu: React.FC<SettingsMenuProps> = ({
+  isOpen,
   view,
   currentModel,
   onSetView,
@@ -21,8 +23,24 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
   onClose
 }) => {
   return (
-    <div className="settings-menu">
-      {view === 'main' ? (
+    <>
+      <div 
+        className={`settings-overlay ${isOpen ? 'open' : ''}`} 
+        onClick={onClose}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClose();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Close settings"
+      />
+      <div className={`settings-menu ${isOpen ? 'open' : ''}`}>
+        
+        
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {view === 'main' ? (
         <>
           <div className="menu-header">Settings</div>
           <button className="menu-item" onClick={() => onSetView('models')}>
@@ -53,7 +71,9 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({
             ))}
           </div>
         </>
-      )}
-    </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 };

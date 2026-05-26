@@ -47,34 +47,13 @@ export const SusurroMenu = ({
   handleSavePersona,
   handleDeletePersona,
 }: SusurroMenuProps) => {
-  const [showToast, setShowToast] = React.useState(false);
-  const [toastKey, setToastKey] = React.useState(0);
-  const toastTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const triggerToast = () => {
-    if (toastTimeoutRef.current) {
-      clearTimeout(toastTimeoutRef.current);
-    }
-    setShowToast(true);
-    setToastKey(prev => prev + 1);
-    toastTimeoutRef.current = setTimeout(() => {
-      setShowToast(false);
-    }, 1500);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (toastTimeoutRef.current) {
-        clearTimeout(toastTimeoutRef.current);
-      }
-    };
-  }, []);
 
   if (menuView === 'main') {
     return (
-      <div className="settings-menu">
+      <div className="settings-menu open">
         <div className="menu-header">Susurro Settings</div>
-        <button className="menu-item" onClick={triggerToast}>
+        <button className="menu-item" onClick={() => setMenuView('personas')}>
           <span>Personas</span>
           <ChevronRight size={14} />
         </button>
@@ -84,7 +63,7 @@ export const SusurroMenu = ({
         </button>
         <div 
           className="menu-item suggestions-menu-toggle"
-          onClick={triggerToast}
+          onClick={() => setIsSuggestionsEnabled(!isSuggestionsEnabled)}
           style={{ cursor: 'pointer' }}
         >
           <div className="menu-item-left">
@@ -99,18 +78,13 @@ export const SusurroMenu = ({
           </label>
         </div>
         <div className="menu-divider" />
-        {showToast && (
-          <div key={toastKey} className="toast-soon">
-            <span>Em breve...</span>
-          </div>
-        )}
       </div>
     );
   }
 
   if (menuView === 'language') {
     return (
-      <div className="settings-menu">
+      <div className="settings-menu open">
         <button className="back-header" onClick={() => setMenuView('main')}>
           <ChevronLeft size={14} /> <span>Idioma</span>
         </button>
@@ -136,7 +110,7 @@ export const SusurroMenu = ({
 
   if (menuView === 'personas') {
     return (
-      <div className="settings-menu personas-menu">
+      <div className="settings-menu personas-menu open">
         <button className="back-header" onClick={() => setMenuView('main')}>
           <ChevronLeft size={14} /> <span>Personas</span>
         </button>

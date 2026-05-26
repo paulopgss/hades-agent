@@ -1,7 +1,8 @@
 import React, { useRef, useEffect } from 'react';
-import { Settings, Pin, PinOff, Minus, Plus, Activity, Type, Languages } from 'lucide-react';
+import { Settings2, Pin, Minus, Plus, Activity, Type, Languages, Minimize2, Maximize2, Menu, MessageSquare, Mic } from 'lucide-react';
 import { MenuView, Persona } from '../../types';
 import { formatTime } from '../../utils/formatters';
+import { electronService } from '../../services/electron';
 import { SusurroMenu } from './SusurroMenu';
 
 interface SusurroHeaderProps {
@@ -38,14 +39,96 @@ interface SusurroHeaderProps {
   increaseFontSize: () => void;
   decreaseFontSize: () => void;
   fontSize: number;
-  onCloseSession: () => void;
+
+  isCompactMode: boolean;
+  setIsCompactMode: (compact: boolean) => void;
+  activeMode?: 'chat' | 'susurro';
+  onSwitchMode?: (mode: 'chat' | 'susurro') => void;
+  currentSessionId?: string | null;
+  isClosingSession?: boolean;
+  onCloseSession: () => Promise<void> | void;
 }
+
+const SessionList: React.FC<{ sessions: any[], setIsMenuOpen: (o: boolean) => void, currentSessionId?: string | null }> = ({ sessions, setIsMenuOpen, currentSessionId }) => (
+  <div style={{ marginTop: '12px' }}>
+    <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#888', paddingLeft: '4px', marginBottom: '8px', letterSpacing: '0.5px' }}>
+      Histórico de Transcrições
+    </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      {sessions.map(session => (
+        <button
+          key={session.id}
+          onClick={() => {
+            // TODO: Ensure susurro can load previous sessions if needed, or just switch to it.
+            // Susurro doesn't currently support loading past transcripts actively into the view,
+            // but we can dispatch an event if it ever does.
+            globalThis.dispatchEvent(new CustomEvent('load-susurro-session', { detail: { id: session.id } }));
+            setIsMenuOpen(false);
+          }}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: session.id === currentSessionId ? 'rgba(255, 255, 255, 0.15)' : 'transparent',
+            color: session.id === currentSessionId ? '#fff' : '#ccc',
+            border: session.id === currentSessionId ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+            padding: '8px 10px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            textAlign: 'left',
+            fontSize: '13px',
+            width: '100%',
+            transition: 'all 0.2s'
+          }}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = session.id === currentSessionId ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+            e.currentTarget.style.color = '#fff';
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.background = session.id === currentSessionId ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)';
+            e.currentTarget.style.color = '#fff';
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = session.id === currentSessionId ? 'rgba(255, 255, 255, 0.15)' : 'transparent';
+            e.currentTarget.style.color = session.id === currentSessionId ? '#fff' : '#ccc';
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.background = session.id === currentSessionId ? 'rgba(255, 255, 255, 0.15)' : 'transparent';
+            e.currentTarget.style.color = session.id === currentSessionId ? '#fff' : '#ccc';
+          }}
+        >
+          <Mic size={14} style={{ opacity: 0.7, flexShrink: 0 }} />
+          <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {session.title || 'Sessão sem nome'}
+          </span>
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 /**
  * SusurroHeader: Contains status indicators, session controls, and settings access.
  */
 export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
   const settingsRef = useRef<HTMLDivElement>(null);
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [sessions, setSessions] = React.useState<any[]>([]);
+
+  // Fetch history when menu opens
+  useEffect(() => {
+    if (isMenuOpen) {
+      electronService.getHistoryData().then((data: any) => {
+        if (data?.susurroHistory) {
+          // Sort by timestamp descending
+          const sorted = data.susurroHistory.sort((a: any, b: any) => 
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          );
+          setSessions(sorted);
+        }
+      });
+    }
+  }, [isMenuOpen]);
 
   // Close settings menu when clicking outside the settings container
   useEffect(() => {
@@ -63,30 +146,120 @@ export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
   return (
     <div className="susurro-header">
       <div className="header-left">
-        <div className="title-with-timer">
-          <div className={`status-indicator ${props.isTranscribing || props.isConnecting ? 'active' : ''}`} style={{ fontSize: '14px', marginRight: '6px' }}>
-            {props.isTranscribing || props.isConnecting ? <Activity size={16} className="pulse" /> : <div className="dot" />}
-            <span style={{ fontWeight: 600, color: props.isTranscribing || props.isConnecting ? '#ef4444' : '#fff' }}>
-              {props.isTranscribing ? "Escutando..." : props.isConnecting ? "Conectando..." : "Susurro"}
-            </span>
-          </div>
-          <span className="header-separator" />
-          <span className="timer-dot" />
-          <span className="chat-timer-text">{formatTime(props.timer)}</span>
-          <div className="info-wrapper" style={{ marginLeft: '4px', WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
-            <button 
-              className="action-btn new-session-btn" 
-              onClick={props.onCloseSession}
-              title="Nova sessão"
-            >
-              <Plus size={16} />
+        <div style={{ position: 'relative', WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+          <button 
+            className="action-btn" 
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            title="Menu"
+            style={{ color: '#dc2626', background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', padding: '4px' }}
+          >
+            <Menu size={16} />
+          </button>
+        </div>
+        
+        {/* Render sidebar inside the header wrapper */}
+        <div 
+          className={`settings-overlay ${isMenuOpen ? 'open' : ''}`}
+          onClick={() => setIsMenuOpen(false)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if(e.key === 'Enter') setIsMenuOpen(false); }}
+        />
+
+        <div className={`sidebar-menu ${isMenuOpen ? 'open' : ''}`}>
+          <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', padding: '10px 4px 0' }}>
+            <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '1px' }}>Menu Principal</span>
+            <button className="action-btn" onClick={() => setIsMenuOpen(false)} style={{ padding: '6px' }}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
-            <div className="usage-popup" style={{ top: '130%', left: '50%', transform: 'translateX(-50%)', width: 'max-content' }}>
-              <div style={{ fontWeight: 600, fontSize: '11px', color: 'rgba(255,255,255,0.95)', whiteSpace: 'nowrap' }}>Nova sessão</div>
-              <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.45)', marginTop: '2px', whiteSpace: 'nowrap' }}>Histórico atual será salvo</div>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 4px' }}>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button
+                onClick={async () => {
+                  if (props.isClosingSession) return;
+                  await props.onCloseSession();
+                  setIsMenuOpen(false);
+                }}
+                disabled={props.isClosingSession}
+                style={{
+                  display: 'flex',
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  background: 'rgba(220, 38, 38, 0.1)',
+                  color: '#dc2626',
+                  border: '1px solid rgba(220, 38, 38, 0.2)',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => e.currentTarget.style.background = 'rgba(220, 38, 38, 0.2)'}
+                onFocus={(e) => e.currentTarget.style.background = 'rgba(220, 38, 38, 0.2)'}
+                onMouseOut={(e) => !props.isClosingSession && (e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)')}
+                onBlur={(e) => !props.isClosingSession && (e.currentTarget.style.background = 'rgba(220, 38, 38, 0.1)')}
+              >
+                {props.isClosingSession ? <Activity size={16} className="pulse" /> : <Plus size={16} />} 
+                {props.isClosingSession ? 'Salvando...' : 'Nova Sessão'}
+              </button>
             </div>
+            
+            {sessions.length > 0 && <SessionList sessions={sessions} setIsMenuOpen={setIsMenuOpen} currentSessionId={props.currentSessionId} />}
           </div>
         </div>
+
+        {(props.isTranscribing || props.isConnecting) && (
+          <div className="title-with-timer">
+            <div className="status-indicator active" style={{ fontSize: '14px', marginRight: '6px' }}>
+              <Activity size={16} className="pulse" />
+              <span style={{ fontWeight: 600, color: '#ef4444' }}>
+                {props.isTranscribing ? "Escutando..." : "Conectando..."}
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {props.onSwitchMode && (
+          <div className="mode-switcher" style={{ display: 'flex', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', padding: '2px', marginLeft: '12px', WebkitAppRegion: 'no-drag' } as React.CSSProperties}>
+            <button 
+              onClick={() => props.onSwitchMode!('chat')} 
+              style={{
+                padding: '4px 12px',
+                borderRadius: '10px',
+                border: 'none',
+                background: props.activeMode === 'chat' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                color: props.activeMode === 'chat' ? '#fff' : '#888',
+                fontSize: '12px',
+                fontWeight: props.activeMode === 'chat' ? 600 : 400,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Chat
+            </button>
+            <button 
+              onClick={() => props.onSwitchMode!('susurro')} 
+              style={{
+                padding: '4px 12px',
+                borderRadius: '10px',
+                border: 'none',
+                background: props.activeMode === 'susurro' ? 'rgba(255,255,255,0.1)' : 'transparent',
+                color: props.activeMode === 'susurro' ? '#fff' : '#888',
+                fontSize: '12px',
+                fontWeight: props.activeMode === 'susurro' ? 600 : 400,
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+            >
+              Susurro
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="header-actions">
@@ -95,17 +268,27 @@ export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
           onClick={props.handleToggleGlobalTranslation}
           title="Tradução Global"
         >
-          <Languages size={18} />
+          <Languages size={16} />
         </button>
 
-        <div className="token-counter">
-          <span className="label">Tokens</span>
-          <span className="value">{props.tokens.toLocaleString()}</span>
+        <button className="action-btn" onClick={() => props.setIsCompactMode(!props.isCompactMode)} title={props.isCompactMode ? "Restaurar" : "Modo Compacto"}>
+          {props.isCompactMode ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+        </button>
+
+        <div className="info-wrapper">
+          <button className="action-btn info-btn" title="Uso do Modelo">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </button>
+          <div className="usage-popup">
+            {props.tokens.toLocaleString()} tokens
+          </div>
         </div>
 
         <div className="settings-container" ref={settingsRef}>
-          <button className={`action-btn settings-btn ${props.isSettingsOpen ? 'active' : ''}`} onClick={() => props.setIsSettingsOpen(!props.isSettingsOpen)}>
-            <Settings size={18} />
+          <button className={`action-btn settings-btn ${props.isSettingsOpen ? 'active' : ''}`} onClick={() => props.setIsSettingsOpen(!props.isSettingsOpen)} title="Configurações">
+            <Settings2 size={16} />
           </button>
           {props.isSettingsOpen && (
             <SusurroMenu
@@ -132,15 +315,19 @@ export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
           )}
         </div>
 
-        <button className="action-btn" onClick={props.togglePin}>
-          {props.isPinned ? <PinOff size={18} color="var(--accent-light)" /> : <Pin size={18} />}
+        <button 
+          className={`action-btn pin-btn ${props.isPinned ? 'active' : ''}`}
+          onClick={props.togglePin}
+          title={props.isPinned ? "Desafixar" : "Fixar no topo"}
+        >
+          <Pin size={16} />
         </button>
 
-        <div className="font-controls">
+        <div className="font-controls" style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', padding: '2px', WebkitAppRegion: 'no-drag' as React.CSSProperties }}>
           <button className="action-btn" onClick={props.decreaseFontSize} title="Diminuir fonte">
             <Minus size={14} />
           </button>
-          <div className="font-size-indicator">
+          <div className="font-size-indicator" style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#888', fontWeight: 600, padding: '0 4px', minWidth: '32px', justifyContent: 'center' }}>
             <Type size={10} style={{ opacity: 0.5 }} />
             <span>{props.fontSize}</span>
           </div>
@@ -149,7 +336,13 @@ export const SusurroHeader: React.FC<SusurroHeaderProps> = (props) => {
           </button>
         </div>
 
-        <button className="action-btn" onClick={props.handleMinimize}><Minus size={18} /></button>
+        <button 
+          className="action-btn close-btn" 
+          onClick={props.handleMinimize}
+          title="Minimizar"
+        >
+          <Minus size={16} />
+        </button>
       </div>
     </div>
   );

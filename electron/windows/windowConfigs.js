@@ -18,8 +18,8 @@ const windowConfigs = {
     width: 730,
     height: 480,
     frame: false,
-    transparent: true,
-    hasShadow: false,
+    transparent: false,
+    hasShadow: true,
     alwaysOnTop: true,
     show: false,
     resizable: true,
@@ -40,11 +40,11 @@ const windowConfigs = {
     }
   },
   chat: {
-    width: 480,
+    width: 720,
     height: 490,
     frame: false,
-    transparent: true,
-    hasShadow: false,
+    transparent: false,
+    hasShadow: true,
     alwaysOnTop: true,
     show: false,
     resizable: true,
@@ -62,7 +62,7 @@ const windowConfigs = {
     onInit: (win) => {
       if (process.platform === 'win32') win.setBackgroundMaterial('mica');
       const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
-      win.setPosition(Math.floor((screenWidth - 480) / 2), 180);
+      win.setPosition(Math.floor((screenWidth - 720) / 2), 180);
     }
   },
   voice: {
@@ -108,7 +108,7 @@ const windowConfigs = {
     }
   },
   susurro: {
-    width: 520,
+    width: 720,
     height: 680,
     frame: false,
     transparent: true,
@@ -116,8 +116,9 @@ const windowConfigs = {
     alwaysOnTop: false,
     show: false,
     resizable: true,
-    minWidth: 360,
-    minHeight: 400,
+    minWidth: 200,
+    minHeight: 150,
+    roundedCorners: false,
     backgroundColor: '#00000000',
     url: `${baseUrl}?window=susurro`,
     webPreferences: {
@@ -128,7 +129,7 @@ const windowConfigs = {
       backgroundThrottling: false,
     },
     onInit: (win) => {
-      if (process.platform === 'win32') win.setBackgroundMaterial('mica');
+      // Transparency conflicts with Mica on Windows, do not set BackgroundMaterial here.
     }
   },
   suggestions: {

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { ChatMessage } from '../types';
 import { buildHadesContext, getHadesSystemPrompt } from '../constants/prompts';
 import { GEMINI_TOOLS } from '../constants/tools';
@@ -21,6 +21,16 @@ export const useGemini = (
 ) => {
   const [isThinking, setIsThinking] = useState(false);
   const [activeTool, setActiveTool] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const cancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setIsThinking(false);
+    setActiveTool(null);
+  }, []);
 
   /**
    * Reads a URL by making a SEPARATE Gemini request using the native url_context tool.
@@ -157,7 +167,8 @@ export const useGemini = (
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: abortControllerRef.current?.signal
     });
 
     if (response.status === 429) {
@@ -252,6 +263,7 @@ export const useGemini = (
    */
   const handleAIResponse = useCallback(async (userMsgText: string, currentHistory: ChatMessage[]): Promise<number> => {
     setIsThinking(true);
+    abortControllerRef.current = new AbortController();
 
     try {
       const settings = await electronService.getSettings();
@@ -330,6 +342,10 @@ export const useGemini = (
       return totalTokens;
 
     } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('[useGemini] Generation cancelled by user.');
+        return 0;
+      }
       console.error("[useGemini] Inference error:", error);
       addMessage(`Erro: ${error.message}`, 'ia');
       return 0;
@@ -342,6 +358,7 @@ export const useGemini = (
   return {
     isThinking,
     activeTool,
-    handleAIResponse
+    handleAIResponse,
+    cancelGeneration
   };
 };

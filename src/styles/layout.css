@@ -1,23 +1,30 @@
 .app-container {
   width: 720px;
-  background: rgba(11, 7, 7, 0.93);
-  backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(220, 38, 38, 0.25);
-  border-radius: 12px;
+  background: rgba(11, 7, 7, 1);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   box-shadow: none;
   overflow: hidden;
   box-sizing: border-box;
-  transition: all 0.2s ease-out;
+  /* PERF: Never use transition: all on a resizable container.
+     Only transition properties that actually animate (not width/height). */
+  transition: box-shadow 0.2s ease-out, border-color 0.2s ease-out, background 0.2s ease-out;
 }
 
 .app-container.chat-mode {
   width: 100%;
   height: 100%;
-  border-radius: 12px;
-  border: 1px solid rgba(220, 38, 38, 0.25);
-  background: rgba(10, 5, 5, 0.95);
+  border-radius: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: none;
+  border-left: none;
+  border-right: none;
+  background: rgba(10, 5, 5, 1);
   box-shadow: none;
   position: relative;
 }
@@ -25,7 +32,15 @@
 .app-container.resizing {
   transition: none !important;
   user-select: none !important;
-  cursor: nwse-resize !important;
+  pointer-events: none !important;
+  backdrop-filter: none !important;
+  background: rgba(11, 7, 7, 0.98) !important;
+}
+
+.app-container.resizing * {
+  transition: none !important;
+  animation: none !important;
+  backdrop-filter: none !important;
 }
 
 .resize-handle {
@@ -49,6 +64,16 @@
   height: 8px;
   border-right: 2px solid rgba(255, 255, 255, 0.2);
   border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+}
+
+.resize-handle:hover .resize-square {
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.resize-handle:active .resize-square {
+  border-color: rgba(239, 68, 68, 0.9);
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.6));
 }
 
 /* Layout Misc */

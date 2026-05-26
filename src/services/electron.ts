@@ -41,8 +41,11 @@ class ElectronService {
   togglePin() { this.electron?.togglePin(); }
   async isPinned() { return await this.electron?.isPinned() ?? false; }
   async isMinimized() { return await this.electron?.isMinimized() ?? false; }
-  async isMaximized() { return await this.electron?.isMaximized() ?? false; }
-  startResizing() { this.electron?.startResizing(); }
+  isMaximized() { return this.electron?.isMaximized() ?? Promise.resolve(false); }
+  resizeWindowFast(width: number, height: number) { this.electron?.resizeWindowFast(width, height); }
+  onWindowResizing(callback: (isResizing: boolean) => void) {
+    return this.electron?.onWindowResizing(callback) || (() => {});
+  }
   toggleMic(enabled: boolean) { this.electron?.toggleMic(enabled); }
   toggleAudio(enabled: boolean) { this.electron?.toggleAudio(enabled); }
 
@@ -74,8 +77,11 @@ class ElectronService {
   }
   saveChat(history: any[]) { this.electron?.saveChat(history); }
   updateChatStatus(hasMessages: boolean) { this.electron?.updateChatStatus(hasMessages); }
-  async endSession(type?: string) { 
-    return await this.handleResponse(this.electron?.endSession(type), null, 'endSession'); 
+  async endSession(type?: string, keepOpen?: boolean) { 
+    return await this.handleResponse(this.electron?.endSession(type, keepOpen), null, 'endSession'); 
+  }
+  async loadSession(sessionId: string) { 
+    return await this.handleResponse(this.electron?.loadSession(sessionId), [], 'loadSession'); 
   }
   async getTotalTokens() { 
     return await this.handleResponse(this.electron?.getTotalTokens(), 0, 'getTotalTokens'); 
@@ -86,8 +92,8 @@ class ElectronService {
   chatWindowReady() { this.electron?.chatWindowReady(); }
 
   // --- Susurro ---
-  async startSusurroLive(personaPrompt?: string) { 
-    return await this.handleResponse(this.electron?.startSusurroLive(personaPrompt), false, 'startSusurroLive'); 
+  async startSusurroLive(personaPrompt?: string, isSuggestionsMode?: boolean) { 
+    return await this.handleResponse(this.electron?.startSusurroLive(personaPrompt, isSuggestionsMode), false, 'startSusurroLive'); 
   }
   async stopSusurroLive() { 
     return await this.handleResponse(this.electron?.stopSusurroLive(), undefined, 'stopSusurroLive'); 
@@ -113,6 +119,10 @@ class ElectronService {
   }
   async saveSusurroMessage(msg: any) {
     return await this.handleResponse(this.electron?.saveSusurroMessage(msg), undefined, 'saveSusurroMessage');
+  }
+  saveSusurroHistory(history: any[]) { this.electron?.saveSusurroHistory?.(history); }
+  async getSusurroHistory() { 
+    return await this.handleResponse(this.electron?.getSusurroHistory?.(), [], 'getSusurroHistory'); 
   }
 
   // --- Tools (IPC wrappers) ---
@@ -160,6 +170,7 @@ class ElectronService {
     return this.electron?.onExecuteTask(callback) || (() => {});
   }
   showChat() { this.electron?.showChat(); }
+  showSusurro() { this.electron?.showSusurro?.(); }
   async translateText(text: string, targetLanguage: string) { 
     return await this.handleResponse(this.electron?.translateText(text, targetLanguage), text, 'translateText'); 
   }

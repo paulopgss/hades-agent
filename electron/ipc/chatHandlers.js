@@ -16,7 +16,7 @@ function registerChatHandlers() {
     store.saveChatHistory(history);
   });
 
-  ipcMain.handle('end-session', async (event, type) => {
+  ipcMain.handle('end-session', async (event, type, keepOpen) => {
     try {
       const isSusurro = type === 'susurro';
       const history = isSusurro ? store.getSusurroHistory() : store.getChatHistory();
@@ -31,10 +31,13 @@ function registerChatHandlers() {
       } else {
         store.saveChatHistory([]);
         appState.chatHasMessages = false;
-        const windowManager = require('../windows/windowManager');
-        const chatWin = windowManager.get('chat');
-        if (chatWin && !chatWin.isDestroyed()) {
-          chatWin.hide();
+        
+        if (!keepOpen) {
+          const windowManager = require('../windows/windowManager');
+          const chatWin = windowManager.get('chat');
+          if (chatWin && !chatWin.isDestroyed()) {
+            chatWin.hide();
+          }
         }
       }
 
@@ -46,21 +49,30 @@ function registerChatHandlers() {
       }
 
       // Run AI session generation asynchronously without blocking the UI
-      let firstMessageContent = 'Nova Sessão';
-      const firstUserMessage = history.find(msg => msg.role === 'user' || msg.sender === 'user');
-      if (firstUserMessage) {
-        if (firstUserMessage.parts) {
-          const textPart = firstUserMessage.parts.find(p => p.text);
+      let firstMessageContent = null;
+      const firstMessage = history.find(msg => {
+        const text = msg.text || msg.pendingText || msg.content || (msg.parts && msg.parts.find(p => p.text)?.text);
+        return text && typeof text === 'string' && text.trim().length > 0;
+      });
+      
+      if (firstMessage) {
+        if (firstMessage.parts) {
+          const textPart = firstMessage.parts.find(p => p.text);
           if (textPart) firstMessageContent = textPart.text;
-        } else if (firstUserMessage.text) {
-          firstMessageContent = firstUserMessage.text;
-        } else if (firstUserMessage.content) {
-          firstMessageContent = firstUserMessage.content;
+        } else if (firstMessage.text) {
+          firstMessageContent = firstMessage.text;
+        } else if (firstMessage.pendingText) {
+          firstMessageContent = firstMessage.pendingText;
+        } else if (firstMessage.content) {
+          firstMessageContent = firstMessage.content;
         }
       }
 
       const aiService = require('../services/aiService');
-      const title = await aiService.generateSessionTitle(firstMessageContent);
+      const defaultTitle = isSusurro ? 'Transcrição Sem Título' : 'Nova Sessão';
+      const title = firstMessageContent && firstMessageContent.trim().length > 0
+        ? await aiService.generateSessionTitle(firstMessageContent)
+        : defaultTitle;
 
       const session = {
         id: Date.now().toString(),
@@ -77,6 +89,21 @@ function registerChatHandlers() {
       return { success: true, data: session };
     } catch (error) {
       logger.error('IPC', 'end-session error', error);
+      return { success: false, error: error.message };
+    }
+  });
+
+  ipcMain.handle('load-session', (event, sessionId) => {
+    try {
+      const sessions = store.getSessions();
+      const session = sessions.find(s => s.id === sessionId);
+      if (!session) return { success: false, error: 'Session not found' };
+      
+      store.saveChatHistory(session.messages);
+      appState.chatHasMessages = session.messages.length > 0;
+      return { success: true, data: session.messages };
+    } catch (error) {
+      logger.error('IPC', 'load-session error', error);
       return { success: false, error: error.message };
     }
   });

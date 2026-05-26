@@ -25,7 +25,7 @@ class GeminiLiveService {
    * @param {string} personaPrompt - The persona instruction for the model.
    * @returns {Promise<boolean>}
    */
-  async start(event, personaPrompt) {
+  async start(event, personaPrompt, isSuggestionsMode = false) {
     if (this.session) {
       this.stop();
     }
@@ -41,6 +41,7 @@ class GeminiLiveService {
     this.chunkCount = 0;
     this._notifiedWaiting = false;
     this.turnStartTime = 0;
+    this.isSuggestionsMode = isSuggestionsMode;
 
     return new Promise((resolve) => {
       (async () => {
@@ -59,7 +60,9 @@ class GeminiLiveService {
               responseModalities: ["AUDIO"],
               systemInstruction: {
                 parts: [{ 
-                  text: personaPrompt || "VOCÊ É UM TRANSRITOR DE ÁUDIO DE ALTA PRECISÃO. REGRA ABSOLUTA: Transcreva EXATAMENTE o que é dito no áudio. NÃO responda, NÃO comente, NÃO gere 'Model Text'. Sua ÚNICA função é fornecer a transcrição via canal de input_audio_transcription. MANTENHA SILÊNCIO TOTAL NO CANAL DE RESPOSTA (AUDIO E TEXTO)."
+                  text: isSuggestionsMode 
+                    ? (personaPrompt || "Você está no modo de Insights. Pare de transcrever o áudio do usuário e em vez disso, ouça suas perguntas ou falas e dê sugestões, respostas e insights. Seja conciso mas útil, nada muito longo porem não pouco, o suficiente apenas. Responda DIRETAMENTE ao que o usuário disser. NUNCA narre seus pensamentos internos ou planejamento (ex: 'I am now focusing on...'). Entregue apenas a resposta final.")
+                    : (personaPrompt || "VOCÊ É UM TRANSRITOR DE ÁUDIO DE ALTA PRECISÃO. REGRA ABSOLUTA: Transcreva EXATAMENTE o que é dito no áudio. NÃO responda, NÃO comente, NÃO gere 'Model Text'. Sua ÚNICA função é fornecer a transcrição via canal de input_audio_transcription. MANTENHA SILÊNCIO TOTAL NO CANAL DE RESPOSTA (AUDIO E TEXTO).")
                 }]
               },
               inputAudioTranscription: { enabled: true },
@@ -115,10 +118,27 @@ class GeminiLiveService {
       }
 
       if (msg.serverContent) {
+        const fs = require('node:fs');
+        const path = require('node:path');
+        const logPath = path.join(process.cwd(), 'gemini_live_payloads.log');
+        fs.appendFileSync(logPath, `\n\n--- PAYLOAD AT ${new Date().toISOString()} ---\n${JSON.stringify(msg, null, 2)}`);
+        
         this.processServerContent(msg.serverContent, event);
       }
     } catch (e) {
       logger.error('GEMINI LIVE', 'Error processing message', e);
+    }
+  }
+
+  processModelTurn(modelTurn, event) {
+    if (!modelTurn?.parts) return;
+    for (const part of modelTurn.parts) {
+      if (part.text && !part.thought) {
+        event.sender.send('susurro-live-delta', { 
+          text: part.text, 
+          isFinal: false 
+        });
+      }
     }
   }
 
@@ -127,11 +147,21 @@ class GeminiLiveService {
 
     // 1. Check for input audio transcription (user talking)
     const inputTranscription = serverContent.inputTranscription;
-    if (inputTranscription) {
+    if (inputTranscription && !this.isSuggestionsMode) {
       this.processInputTranscription(inputTranscription, event, now);
     }
 
-    // 2. Output transcription (model talking) is intentionally ignored to prevent polluting the history.
+    // 2. Output transcription (model talking)
+    if (this.isSuggestionsMode) {
+      this.processModelTurn(serverContent.modelTurn, event);
+      
+      if (serverContent.outputTranscription?.text) {
+        event.sender.send('susurro-live-delta', { 
+          text: serverContent.outputTranscription.text, 
+          isFinal: false 
+        });
+      }
+    }
 
     // 4. Check for explicit turn completion
     if (serverContent.turnComplete) {

@@ -31,14 +31,20 @@ contextBridge.exposeInMainWorld('electron', {
   minimizeWindow: () => ipcRenderer.invoke('minimize-window'),
   resizeWindow: (w, h) => ipcRenderer.invoke('resize-window', { width: w, height: h }),
   showChat: () => ipcRenderer.send('show-chat'),
+  showSusurro: () => ipcRenderer.send('show-susurro'),
   togglePin: () => ipcRenderer.send('toggle-pin'),
   isPinned: () => ipcRenderer.invoke('is-pinned'),
   isMinimized: () => ipcRenderer.invoke('is-minimized'),
   isMaximized: () => ipcRenderer.invoke('is-maximized'),
-  startResizing: () => ipcRenderer.send('start-resizing'),
+  resizeWindowFast: (w, h) => ipcRenderer.send('resize-window-fast', { width: w, height: h }),
   updateChatPin: (pinned) => ipcRenderer.send('update-chat-pin', pinned),
   toggleMic: (enabled) => ipcRenderer.send('toggle-mic', enabled),
   toggleAudio: (enabled) => ipcRenderer.send('toggle-audio', enabled),
+  onWindowResizing: (callback) => {
+    const sub = (_event, isResizing) => callback(isResizing);
+    ipcRenderer.on('window-resizing', sub);
+    return () => ipcRenderer.removeListener('window-resizing', sub);
+  },
 
   // --- Chat & Persistence ---
   getChat: () => ipcRenderer.invoke('get-chat-history'),
@@ -46,7 +52,8 @@ contextBridge.exposeInMainWorld('electron', {
   updateChatStatus: (hasMessages) => ipcRenderer.send('chat-status-update', { hasMessages }),
   updateTokens: (count) => ipcRenderer.invoke('update-tokens', count),
   getTotalTokens: () => ipcRenderer.invoke('get-total-tokens'),
-  endSession: (type) => ipcRenderer.invoke('end-session', type),
+  endSession: (type, keepOpen) => ipcRenderer.invoke('end-session', type, keepOpen),
+  loadSession: (sessionId) => ipcRenderer.invoke('load-session', sessionId),
   chatWindowReady: () => ipcRenderer.send('chat-window-ready'),
 
   // --- Tasks ---
@@ -70,7 +77,7 @@ contextBridge.exposeInMainWorld('electron', {
     ipcRenderer.on('voice-send', sub);
     return () => ipcRenderer.removeListener('voice-send', sub);
   },
-  startSusurroLive: (persona) => ipcRenderer.invoke('susurro-start-live', persona),
+  startSusurroLive: (persona, isSuggestionsMode) => ipcRenderer.invoke('susurro-start-live', persona, isSuggestionsMode),
   stopSusurroLive: () => ipcRenderer.invoke('susurro-stop-live'),
   sendSusurroChunk: (base64, seq) => ipcRenderer.send('susurro-send-chunk', base64, seq),
   onSusurroLiveDelta: (callback) => {
@@ -121,6 +128,8 @@ contextBridge.exposeInMainWorld('electron', {
     return () => ipcRenderer.removeListener('new-suggestion', sub);
   },
   saveSusurroMessage: (msg) => ipcRenderer.invoke('save-susurro-message', msg),
+  saveSusurroHistory: (history) => ipcRenderer.send('save-susurro-history', history),
+  getSusurroHistory: () => ipcRenderer.invoke('get-susurro-history'),
 
   // --- Translation Service ---
   translateText: (text, target) => ipcRenderer.invoke('susurro-translate', text, target),

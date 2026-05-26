@@ -48,6 +48,20 @@ function registerSusurroHandlers() {
     }
   });
 
+  ipcMain.on('save-susurro-history', (event, history) => {
+    store.saveSusurroHistory(history);
+  });
+
+  ipcMain.handle('get-susurro-history', (event) => {
+    try {
+      const history = store.getSusurroHistory();
+      return { success: true, data: history };
+    } catch (error) {
+      logger.error('IPC', 'get-susurro-history error', error);
+      return { success: false, error: error.message };
+    }
+  });
+
   // --- Translation (SSOT from TranslationService) ---
   ipcMain.handle('susurro-translate', async (event, text, targetLang) => {
     try {
@@ -82,9 +96,9 @@ function registerSusurroHandlers() {
     geminiLiveService.sendChunk(chunk);
   });
 
-  ipcMain.handle('susurro-start-live', async (event, personaPrompt) => {
+  ipcMain.handle('susurro-start-live', async (event, personaPrompt, isSuggestionsMode) => {
     try {
-      const started = await geminiLiveService.start(event, personaPrompt);
+      const started = await geminiLiveService.start(event, personaPrompt, isSuggestionsMode);
       return { success: started, data: started };
     } catch (error) {
       logger.error('IPC', 'susurro-start-live error', error);

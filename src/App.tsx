@@ -1,11 +1,24 @@
-import React, { useEffect } from 'react'
-import CommandBar from './components/CommandBar'
+import React, { useEffect, useState } from 'react'
 import MiniChat from './components/MiniChat'
-import VoiceRecorder from './components/VoiceRecorder'
 import Susurro from './components/Susurro'
 import SuggestionsPopup from './components/SuggestionsPopup'
 import Splash from './components/Splash'
 import Settings from './components/Settings'
+
+const UnifiedApp: React.FC = () => {
+  const [activeMode, setActiveMode] = useState<'chat' | 'susurro'>('chat');
+
+  return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: activeMode === 'chat' ? 'flex' : 'none', flex: 1, overflow: 'hidden' }}>
+        <MiniChat activeMode={activeMode} onSwitchMode={setActiveMode} />
+      </div>
+      <div style={{ display: activeMode === 'susurro' ? 'flex' : 'none', flex: 1, overflow: 'hidden' }}>
+        <Susurro activeMode={activeMode} onSwitchMode={setActiveMode} />
+      </div>
+    </div>
+  );
+};
 
 const App: React.FC = () => {
   const urlParams = new URLSearchParams(globalThis.location.search)
@@ -24,15 +37,7 @@ const App: React.FC = () => {
     return <Splash />
   }
 
-  if (windowType === 'chat') {
-    return <MiniChat />
-  }
-
-  if (windowType === 'voice') {
-    return <VoiceRecorder />
-  }
-
-  if (windowType === 'susurro') {
+  if (windowType === 'susurro-standalone') {
     return <Susurro />
   }
 
@@ -44,7 +49,8 @@ const App: React.FC = () => {
     return <Settings />
   }
 
-  return <CommandBar />
+  // Default is now UnifiedApp for 'chat', 'command' and 'susurro'
+  return <UnifiedApp />
 }
 
 export default App
