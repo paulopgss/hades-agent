@@ -37,3 +37,7 @@ opencode.json
 release/
 
 debug_and_traces/
+
+# Ignore text files (logs, diffs, temp notes)
+*.txt
+!CHANGELOG_UPDATE.txt
